@@ -28,12 +28,10 @@ const Layout = ({ children, customMeta }: LayoutProps): JSX.Element => {
       </main>
       <footer className="py-8">
         <div className="max-w-5xl px-8 mx-auto">
-          Built by{' '}
-          <a
-            className="text-gray-900 dark:text-white"
-            href="https://twitter.com/huntarosan"
-          >
-            Hunter Chang
+          Created by <a href="https://github.com/mikeger">Mike Gerasymenko</a> ©{' '}
+          {new Date().getFullYear()} All rights reserved. <br /> Based on{' '}
+          <a href="https://github.com/ChangoMan/nextjs-typescript-mdx-blog">
+            nextjs-typescript-mdx-blog
           </a>
         </div>
       </footer>
