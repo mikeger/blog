@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "deploy": "next build --prefix-paths && gh-pages -d public",
+    "deploy": "next build && gh-pages -d public",
     "start": "next start",
     "type-check": "tsc --pretty --noEmit",
     "format": "prettier --write .",
