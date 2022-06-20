@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "deploy": "next build && next export && gh-pages -d out",
+    "deploy": "next build && next export && touch ./out/.nojekyll && gh-pages -d out",
     "start": "next start",
     "type-check": "tsc --pretty --noEmit",
     "format": "prettier --write .",
