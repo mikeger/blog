@@ -17,7 +17,7 @@ export const Index = ({ posts }: IndexProps): JSX.Element => {
 
       {posts
         .filter((post) => {
-          !post.slug.startsWith('private-');
+          return !post.slug.startsWith('private-');
         })
         .map((post) => (
           <article key={post.slug} className="mt-12">

@@ -11,7 +11,6 @@ const Head = ({ customMeta }: { customMeta?: MetaProps }): JSX.Element => {
     title: 'Mike Gerasymenko - iOS et al.',
     description:
       'Personal page of Mike Gerasymenko, ukraininan🇺🇦 iOS developer from Berlin.',
-    image: `${WEBSITE_HOST_URL}/images/site-preview.png`,
     type: 'website',
     ...customMeta,
   };
