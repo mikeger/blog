@@ -7,11 +7,23 @@ image: /images/wwdc22/apple_park.jpg
 published: true
 ---
 
+<Image
+  alt={`Apple Park`}
+  src={`/images/wwdc22/apple_park1.jpg`}
+  width={1440}
+  height={1080}
+  priority
+/>
+
 ## Key points
 
 I've moved a bigger project (ca. 300K SLOC, 16 external dependencies) to Swift Package Manager (SPM, SwiftPM) and would like to share my learnings with others following this path.
 
 I would start with the key points and go in-depth at the end of the post.
+
+### What stays the same
+
+- Compilation time: there seem to be no measureable difference that I've noticed between Cocoapods and SPM
 
 ### What I find good
 
@@ -19,7 +31,7 @@ I would start with the key points and go in-depth at the end of the post.
 - Local packages are working really well:
   - It is possible to add and remove files on the fly, Xcode can figure out the updates
   - Xcode understands the changes that are happening and recalculates the dependencies if needed
-- No need for `xcworkspace` anymore
+- No need for `xcworkspace` anymore (unless you have multiple projects)
 - Integration in Xcode: to change or add the dependency, select project, in the project on the right select the project -> Package Dependencies
 - It is possible to use an automatically created Bundle.module reference when looking for the bundle resources inside of a module
 
@@ -103,7 +115,7 @@ In the end, you would need to have a list of dependencies and versions you would
 
 Cocoapods are usually deeply integrated with the project through the xcconfigs and build steps. If you would like to have a clean slate, it is necessary to remove cocoapods before we would start integrating SPM packages. This can be easily achieved via [pod deintegrate](https://guides.cocoapods.org/terminal/commands.html#pod_deintegrate).
 
-```
+```bash
 sudo gem install cocoapods-deintegrate cocoapods-clean
 pod deintegrate
 pod cache clean --all
