@@ -69,7 +69,7 @@ I am a Staff iOS engineer at Delivery Hero Logistics:
 We are constantly hiring Staff+ mobile engineers. Reach out if you are interested. Or apply [here](https://careers.deliveryhero.com/global/en/job/JR0032021/Staff-iOS-Engineer-f-m-d-Client-Foundation).
 
 ---
-![bg 98%](images/brands.png)
+![bg 100%](images/brands.png)
 
 <!-- header: '' -->
 <!-- footer: '' -->
@@ -81,7 +81,9 @@ We are constantly hiring Staff+ mobile engineers. Reach out if you are intereste
 
 # What is it about?
 
-I've moved a Rider app (ca. 300K SLOC, 16 external dependencies) to Swift Package Manager.
+> Swift Package Manager (SPM) is a tool developed by Apple for managing distribution of Swift code.
+
+I've moved our Rider app (ca. 300K SLOC, 16 external dependencies) to Swift Package Manager.
 
 I would start with the key points and go in-depth at the end of the presentation.
 
@@ -128,10 +130,17 @@ For the local packages:
 ## SPM: What I find good
 
 - No need for `xcworkspace` anymore (unless you have multiple projects)
-- Integration in Xcode: to change or add the dependency, select project, in the project on the right select the project -> Package Dependencies
 - It is possible to use an automatically created `Bundle.module` reference when looking for the bundle resources inside of a module
 
 ![bg left:33%](images/typing.png)
+
+---
+
+## SPM: Good: Adding a dependency
+
+- Integration in Xcode: to change or add a dependency, in the project on the right select the project -> Package Dependencies
+
+![](images/add_dep.png)
 
 ---
 
@@ -163,7 +172,7 @@ I think personally it was still worth it. SPM allows for creating a better modul
 
 # In-depth
 
-Once the basic things are out of the way, we can take a less shallow look on the SPM and the migration.
+Once the basic things are out of the way, we can take a deeper look on the SPM and the migration.
 
 ---
 
@@ -327,13 +336,13 @@ let package = Package(
 
 Something that for me would be truly great to see in the SPM.
 
-## Shallow clones of the dependencies
+#### Shallow clones of the dependencies
 
 Truly low-hanging fruit that would speed up the CI.
 
-## Build artifacts caching
+#### Build artifacts caching
 
-Wouldn't it be great not to rebuild the changes every time on your computer or the CI?
+Wouldn't it be great to skip rebuilding unchanged dependencies every time?
 
 ![bg right:33%](images/kitchen.png)
 
