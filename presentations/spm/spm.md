@@ -27,10 +27,10 @@ h1, h2, h3 {
 </style>
 
 
-# Moving bigger project to Swift Package Manager (SPM)
+### Moving bigger project to Swift Package Manager (SPM)
+Cocoaheads Berlin October 2022
 
-Cocoaheads Berlin
-October 2022
+![h:450](images/cover.jpg)
 
 ---
 <!-- paginate: true -->
@@ -59,7 +59,7 @@ You know what to do. Thank you.
 
 ---
 
-![bg right:33%](images/logistics.png)
+![bg h:300 right:33%](images/logistics.png)
 # Where I work
 
 I am a Staff iOS engineer at Delivery Hero Logistics:
