@@ -236,9 +236,9 @@ In hermetic build systems like Bazel, it is possible to collect all the argument
 
 I believe work on this topic is already happening inside of the SPM team, so we would be able to benefit from it in the future.
 
-### Solution we ended up with
+### The solution we ended up with
 
-In my team we ended up using a local copy of foreign dependencies `xcframeworks` gathered under a single `Package.swift` manifest. Such a copy can be created using Carthage. This allows to speed up build times and removed the warnings displayed from them.
+In my team, we ended up using a local copy of foreign dependencies `xcframeworks` gathered under a single `Package.swift` manifest. Carthage can create such a copy. This allows us to speed up build times and remove the warnings displayed from them.
 
 ## Nota Bene: SPM Slack
 
