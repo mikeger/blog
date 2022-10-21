@@ -54,7 +54,7 @@ So, what happened when I moved a large project from Cocoapods to Swift Package M
 
 ### What could be improved?
 
-- SPM is doing full checkouts of dependencies repositories. This is necessary, since SPM needs to know the version history of the repository. This is not an issue, if you would be using [Swift Package Registry](https://swiftpackageregistry.com)
+- SPM is doing full checkouts of dependencies repositories. This is necessary, since SPM needs to know the version history of the repository. This must not be an issue in the future, once the [SE-0292 Swift Package Registry](https://github.com/apple/swift-evolution/blob/main/proposals/0292-package-registry-service.md) would be implemented.
 - Dependencies are defined inside of the `project.pbxproj`
 - A lot of warnings from the frameworks that are not possible to suppress
 
@@ -224,7 +224,7 @@ I am going to take you through what else I would like to see in the SPM.
 
 ### Shallow clones of the dependencies
 
-Truly low-hanging fruit that would speed up the CI. This is currently not possible, because SPM needs to know the version history of a package. This must not be an issue, if you would be using [Swift Package Registry](https://swiftpackageregistry.com)
+Truly low-hanging fruit that would speed up the CI. This is currently not possible, because SPM needs to know the version history of a package. This must not be an issue in the future, once the [SE-0292 Swift Package Registry](https://github.com/apple/swift-evolution/blob/main/proposals/0292-package-registry-service.md) would be implemented.
 
 ### Build artifacts caching
 
