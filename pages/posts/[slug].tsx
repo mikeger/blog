@@ -16,6 +16,8 @@ import Layout, { WEBSITE_HOST_URL } from '../../components/Layout';
 import { MetaProps } from '../../types/layout';
 import { PostType } from '../../types/post';
 import { postFilePaths, POSTS_PATH } from '../../utils/mdxUtils';
+import remarkEmbedder from '@remark-embedder/core';
+import oembedTransformer from '@remark-embedder/transformer-oembed';
 
 // Custom components/renderers to pass to MDX.
 // Since the MDX files aren't loaded by webpack, they have no knowledge of how
@@ -66,7 +68,10 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const mdxSource = await serialize(content, {
     // Optionally pass remark/rehype plugins
     mdxOptions: {
-      remarkPlugins: [require('remark-code-titles')],
+      remarkPlugins: [
+        require('remark-code-titles'),
+        [remarkEmbedder, { transformers: [oembedTransformer] }],
+      ],
       rehypePlugins: [mdxPrism, rehypeSlug, rehypeAutolinkHeadings],
     },
     scope: data,

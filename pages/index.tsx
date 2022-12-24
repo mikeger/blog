@@ -13,14 +13,24 @@ type IndexProps = {
 export const Index = ({ posts }: IndexProps): JSX.Element => {
   return (
     <Layout>
-      <h1>Mike Gerasymenko — iOS et al.</h1>
+      <h1>
+        <img
+          src="images/apple-pin.png"
+          width="64"
+          style={{ display: 'inline', verticalAlign: 'middle' }}
+          alt="WWDC'22 pin: Ukraine"
+        />{' '}
+        Mike Gerasymenko — iOS et al.
+      </h1>
 
-      {posts
-        .filter((post) => {
-          return !post.slug.startsWith('private-');
-        })
-        .map((post) => (
-          <article key={post.slug} className="mt-12">
+      {posts.map((post) => (
+        <div key={post.slug} className="article-preview">
+          <p className="image">
+            {post.image && (
+              <img src={post.image} alt={post.title} width={160} />
+            )}
+          </p>
+          <p>
             <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">
               {format(parseISO(post.date), 'MMMM dd, yyyy')}
             </p>
@@ -37,14 +47,15 @@ export const Index = ({ posts }: IndexProps): JSX.Element => {
                 <a>Read More</a>
               </Link>
             </p>
-          </article>
-        ))}
+          </p>
+        </div>
+      ))}
     </Layout>
   );
 };
 
 export const getStaticProps: GetStaticProps = async () => {
-  const posts = getAllPosts(['date', 'description', 'slug', 'title']);
+  const posts = getAllPosts(['date', 'description', 'slug', 'title', 'image']);
 
   return {
     props: { posts },

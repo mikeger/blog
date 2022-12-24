@@ -25,6 +25,8 @@
     ]
   },
   "dependencies": {
+    "@remark-embedder/core": "^3.0.1",
+    "@remark-embedder/transformer-oembed": "^3.0.0",
     "@tailwindcss/typography": "^0.4.1",
     "date-fns": "^2.19.0",
     "gray-matter": "^4.0.2",

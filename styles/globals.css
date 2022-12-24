@@ -113,3 +113,24 @@ pre {
 .mdx-marker {
   @apply block -mx-4 px-4 bg-gray-100 dark:bg-gray-800 border-l-4 border-blue-500;
 }
+
+div.article-preview {
+  display: flex;
+  padding-bottom: 4em;
+}
+
+div.article-preview p {
+  display: flex;
+  flex-direction: column;
+}
+
+div.article-preview p.image {
+  flex: 0 0 12em;
+  padding-right: 16pt;
+  text-align: center;
+}
+
+p.image img {
+  margin-left: auto;
+  margin-right: auto;
+}
