@@ -152,7 +152,7 @@ If you would like to go step by step, you can always remove one dependency and a
 
 #### Step 4: Migrating the local and in-house packages (if any)
 
-Moving from Cocoapods [podspec manifest](https://guides.cocoapods.org/syntax/podspec.html) to an SPM [Package.swift](https://developer.apple.com/documentation/xcode/creating-a-standalone-swift-package-with-xcode) is a breeze. I  I find it quite self-explanatory. Take a look at the migration example I've taken from an internal package:
+Moving from Cocoapods [podspec manifest](https://guides.cocoapods.org/syntax/podspec.html) to an SPM [Package.swift](https://developer.apple.com/documentation/xcode/creating-a-standalone-swift-package-with-xcode) is a breeze. I I find it quite self-explanatory. Take a look at the migration example I've taken from an internal package:
 
 ##### Cocoapods podspec
 
@@ -167,13 +167,13 @@ Pod::Spec.new do |s|
   s.platform     = :ios, "11"
   s.source       = { :git => "git@github.com:deliveryhero/MyChatModule.git", :tag => "#{s.version}" }
   s.swift_version = '5.0'
-  
+
   s.static_framework = true
 
   s.dependency 'DependencyInjection', '1.0.0'
   s.dependency 'Networking', '1.0.0'
   s.dependency 'ExternalSDK', '5.2.1'
-  
+
   s.source_files = "Sources/**/*.{swift}"
   s.resources = "Resources/**/*.{storyboard,xib,xcassets,png,pdf,ttf}"
 
@@ -207,13 +207,13 @@ let package = Package(
     targets: [
         .target(
             name: "MyChatModule",
-            dependencies: ["Networking", 
-                           "DependencyInjection", 
+            dependencies: ["Networking",
+                           "DependencyInjection",
                            .product(name: "ExternalSDK", package: "ExternalSDK-ios")],
             path: "Sources",
             resources: [.process("Resources/Assets.xcassets"),
-                        .process("Resources/Illustrations.xcassets"), 
-                        .process("Resources/Icons.xcassets"), 
+                        .process("Resources/Illustrations.xcassets"),
+                        .process("Resources/Icons.xcassets"),
                         .copy("Resources/Fonts/font.ttf")]
         ),
         .testTarget(

@@ -16,19 +16,17 @@ export const About = (): JSX.Element => {
         years of software development experience, 12 years of iOS. I have
         experience working on great products and I am excited to see them used.
       </p>
-      <p>
-        <ul>
-          <li>
-            <a href="https://github.com/mikeger">GitHub</a>
-          </li>
-          <li>
-            <a href="https://www.linkedin.com/in/mikeamike/">LinkedIn</a>
-          </li>
-          <li>
-            <a href="https://twitter.com/gk0io">Twitter</a>
-          </li>
-        </ul>
-      </p>
+      <ul>
+        <li>
+          <a href="https://github.com/mikeger">GitHub</a>
+        </li>
+        <li>
+          <a href="https://www.linkedin.com/in/mikeamike/">LinkedIn</a>
+        </li>
+        <li>
+          <a href="https://twitter.com/gk0io">Twitter</a>
+        </li>
+      </ul>
     </Layout>
   );
 };

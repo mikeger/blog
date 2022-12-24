@@ -26,18 +26,20 @@ h1, h2, h3 {
 }
 </style>
 
-
 ### Moving bigger project to Swift Package Manager (SPM)
+
 Cocoaheads Berlin October 2022
 
 ![h:450](images/cover.jpg)
 
 ---
+
 <!-- paginate: true -->
 <!-- footer: 'Moving bigger project to Swift Package Manager <br> Mike Gerasymenko @gk0io' -->
+
 # Who I am
 
-Hey, I'm Mike. I am originally from Ukraine 🇺🇦. 
+Hey, I'm Mike. I am originally from Ukraine 🇺🇦.
 
 I started as iOS engineer in 2009 at Readdle. Worked at Wire, Cara Care and Feeld.
 
@@ -60,21 +62,25 @@ You know what to do. Thank you.
 ---
 
 ![bg h:300 right:33%](images/logistics.png)
+
 # Where I work
 
 I am a Staff iOS engineer at Delivery Hero Logistics:
+
 - Available in 75 countries
 - Serving 1M delivery drivers monthly
 
 We are constantly hiring Staff+ mobile engineers. Reach out if you are interested. Or apply [here](https://careers.deliveryhero.com/global/en/job/JR0032021/Staff-iOS-Engineer-f-m-d-Client-Foundation).
 
 ---
+
 ![bg 100%](images/brands.png)
 
 <!-- header: '' -->
 <!-- footer: '' -->
-<!-- paginate: false -->
----
+
+## <!-- paginate: false -->
+
 <!-- paginate: true -->
 <!-- header: '![height:1cm](images/logo_dh_logistics.png)' -->
 <!-- footer: 'Moving bigger project to Swift Package Manager <br> Mike Gerasymenko @gk0io' -->
@@ -89,7 +95,6 @@ I would start with the key points and go in-depth at the end of the presentation
 
 There is a companion post here:
 https://gera.cx/posts/move-to-spm
-
 
 ---
 
@@ -113,13 +118,13 @@ https://gera.cx/posts/move-to-spm
 
 ![bg right:33%](images/dev_center.jpg)
 
-
 ---
 
 ## SPM: What I find good
 
 Swift as a first-class citizen: packages are defined in Swift.
-For the local packages: 
+For the local packages:
+
 - It is possible to add and remove files on the fly, Xcode can figure out the updates
 - Xcode understands the changes that are happening and recalculates the dependencies if needed
 
@@ -215,10 +220,10 @@ I've had to go with the following steps:
 - List all external and internal dependencies
 - Find which versions of those dependencies are providing SPM support
   - If a library version used already supports SPM, we are good
-  - If a library needs to be updated, check the release notes of the versions we need to go over. 
-<!-- This can be done as a separate task, i.e. you can update to the needed version with your existing package manager and let it be tested for compatibility with your app. -->
-  - If a library does not support SPM at all, fork it and introduce SPM to it. 
-<!-- Then, when you are confident it is working, create a pull request from your fork to the upstream repo. Let other engineers enjoy the SPM support you've developed! -->
+  - If a library needs to be updated, check the release notes of the versions we need to go over.
+  <!-- This can be done as a separate task, i.e. you can update to the needed version with your existing package manager and let it be tested for compatibility with your app. -->
+  - If a library does not support SPM at all, fork it and introduce SPM to it.
+  <!-- Then, when you are confident it is working, create a pull request from your fork to the upstream repo. Let other engineers enjoy the SPM support you've developed! -->
 
 In the end, you would need to have a list of dependencies and versions you would like to use.
 
@@ -271,13 +276,13 @@ Pod::Spec.new do |s|
   s.platform     = :ios, "11"
   s.source       = { :git => "git@github.com:deliveryhero/MyChatModule.git", :tag => "#{s.version}" }
   s.swift_version = '5.0'
-  
+
   s.static_framework = true
 
   s.dependency 'DependencyInjection', '1.0.0'
   s.dependency 'Networking', '1.0.0'
   s.dependency 'ExternalSDK', '5.2.1'
-  
+
   s.source_files = "Sources/**/*.{swift}"
   s.resources = "Resources/**/*.{storyboard,xib,xcassets,png,pdf,ttf}"
 
@@ -289,8 +294,8 @@ end
 
 <!-- header: '' -->
 <!-- footer: '' -->
-<!-- paginate: false -->
----
+
+## <!-- paginate: false -->
 
 ### SPM package manifest
 
@@ -312,8 +317,8 @@ let package = Package(
     targets: [
         .target(
             name: "MyChatModule",
-            dependencies: ["Networking", 
-                           "DependencyInjection", 
+            dependencies: ["Networking",
+                           "DependencyInjection",
                            .product(name: "ExternalSDK", package: "ExternalSDK-iOS")],
             path: "Sources",
             resources: [.process("Resources/Assets.xcassets"),
@@ -328,6 +333,7 @@ let package = Package(
 ```
 
 ---
+
 <!-- paginate: true -->
 <!-- header: '![height:1cm](images/logo_dh_logistics.png)' -->
 <!-- footer: 'Moving bigger project to Swift Package Manager <br> Mike Gerasymenko @gk0io' -->
@@ -349,6 +355,7 @@ Wouldn't it be great to skip rebuilding unchanged dependencies every time?
 ---
 
 ## SPM cheat sheet
+
 ### General information
 
 Dependencies are defined in the project or workspace file: this is your old `Podfile`; pinned versions are saved in `Project.xcodeproj|Workspace.xcworkspace/xcshareddata/swiftpm/Package.resolved` — this is your `Podfile.lock`
@@ -356,6 +363,7 @@ Dependencies are defined in the project or workspace file: this is your old `Pod
 ---
 
 ## SPM troubleshooting
+
 ### Xcode error: Missing build product for `xxx`
 
 Try closing Xcode, then executing in the project folder in the Terminal: `xcodebuild -resolvePackageDependencies -project <Project>.xcodeproj -scheme <Scheme>`, or `xcodebuild -resolvePackageDependencies -workspace <Workspace>.xcworkspace -scheme <Scheme>` if you are using a workspace.
@@ -363,6 +371,7 @@ Try closing Xcode, then executing in the project folder in the Terminal: `xcodeb
 ---
 
 ## SPM troubleshooting
+
 ### Xcode: `Server SSH Fingerprint Failed to Verify`
 
 Double-click the error message in Xcode and confirm the GitHub's fingerprint.
@@ -372,6 +381,7 @@ Double-click the error message in Xcode and confirm the GitHub's fingerprint.
 ---
 
 ## SPM troubleshooting
+
 ### SPM is failing to fetch private packages
 
 - Sign in to GitHub in Xcode -> Preferences -> Accounts
@@ -383,6 +393,7 @@ Double-click the error message in Xcode and confirm the GitHub's fingerprint.
 ---
 
 ## SPM troubleshooting
+
 ### General
 
 - Update Xcode to the latest release version
