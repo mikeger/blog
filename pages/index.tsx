@@ -17,7 +17,11 @@ export const Index = ({ posts }: IndexProps): JSX.Element => {
         <img
           src="images/apple-pin.png"
           width="64"
-          style={{ display: 'inline', verticalAlign: 'middle' }}
+          style={{
+            display: 'inline',
+            verticalAlign: 'middle',
+            marginBottom: '5px',
+          }}
           alt="WWDC'22 pin: Ukraine"
         />{' '}
         Mike Gerasymenko — iOS et al.
