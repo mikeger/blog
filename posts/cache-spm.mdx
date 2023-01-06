@@ -197,19 +197,19 @@ As a result of this exercise, our team decreased the CI build and test time from
 
 # Q&A
 
-QQ: Should one consider switching to Carthage alltogether?
+QQ: Should one consider switching to Carthage altogether?
 
 In my opinion no, because Swift PM allows for modularization.
 
 QQ: Why use XCFramework format, specifically?
 
-This format, in comparison to a regular `framework`, allows the packaging of several binaries of the same architecture for different SDKs. In practise, this means Apple Silicon simulator support.
+This format, in comparison to a regular `framework`, allows the packaging of several binaries of the same architecture for different SDKs. In practice, this means Apple Silicon simulator support.
 
 QQ: Any additional effect from this?
 One of the effects of this optimization is that the dependencies are now dynamic frameworks. This has pros and cons:
 
 - If you have multiple targets, every target would be able to link to the frameworks without growing in size. Static frameworks would be included in every target multiplying the size.
 
-- Dynamic frameworks negatively affect your app's startup time. iOS is taking some time to load dynamic libraries on the app starup.
+- Dynamic frameworks negatively affect your app's startup time. iOS is taking some time to load dynamic libraries on the app startup.
 
 <!-- Why run tests for the code you haven't changed?  -->
