@@ -26,7 +26,7 @@ h1, h2, h3 {
 }
 </style>
 
-# Make your app mobular 
+# Make your app modular 
 # @ 
 # Test only what's changed
 
@@ -47,7 +47,7 @@ Albert Einstein, probably
 
 # Modules
 
-Imgine we have the following dependencies structure
+Imagine, we have the following dependencies structure
 
 ![bg right:60% 90%](images/structure.png)
 
@@ -81,7 +81,7 @@ If the _📦Login_ module is changed, it would only affect the _📦LoginUI_ and
 
 ### 1. Detecting what is changed
 
-Well, Git allows to find what files were touched in the changeset. 
+Well, Git allows us to find what files were touched in the changeset. 
 
 ```bash
 Root
@@ -97,7 +97,7 @@ Root
 
 ### 2. Build the dependency graph
 
-Going from the project to it's dependencies, to it's dependencies, to dependencies of the dependencies, ...
+Going from the project to its dependencies, to its dependencies, to dependencies of the dependencies, ...
 
 Can be achieved with _xcodeproj_ gem or a similar library.
 
@@ -111,7 +111,7 @@ _BTW, This is the moment your Leetcode graph exercises would pay off_
 
 ---
 
-### 2.5. Save list of files for each dependency
+### 2.5. Save the list of files for each dependency
 
 This is important, so we'll know which files affect which targets.
 
@@ -119,7 +119,7 @@ This is important, so we'll know which files affect which targets.
 
 ## 3. Traverse the graph
 
-Go from every changed dependency all the way up, save a set of dependencies you've touched.
+Go from every changed dependency all the way up, and save a set of dependencies you've touched.
 
 ![bg right:60% 90%](images/structure.png)
 
@@ -127,7 +127,7 @@ Go from every changed dependency all the way up, save a set of dependencies you'
 
 ## 4. Disable tests that can be skipped in the scheme / test plan
 
-This is actually the hardest part. Dealing with obscure Xcode formats. But we get that far, we will not be scared by 10 year old XMLs.
+This is actually the hardest part. Dealing with obscure Xcode formats. But if we get that far, we will not be scared by 10-year-old XMLs.
 
 ---
 
@@ -137,7 +137,7 @@ This is actually the hardest part. Dealing with obscure Xcode formats. But we ge
 
 ---
 
-# Sounds like fun Mike
+# Sounds like fun, Mike
 
 But I am not going to implement it now.
 
