@@ -15,14 +15,14 @@ published: false
   priority
 />
 
-If you are a mobile engineer like me, you could not be more excited about the Apple Silicon computers. They are performant and energy-efficient, but before all, they allow building your projects faster and without jet engine fans sound. However, even with this improvement, the compilation times are very far from what you are getting in web development. Building locally or on the CI takes up momentum and sometimes can push you out of the flow, decreasing overall productivity. 
+If you are a mobile engineer like me, you could not be more excited about the Apple Silicon computers. They are performant and energy-efficient, but before all, they allow building your projects faster and without jet engine fans sound. However, even with this improvement, the compilation times are very far from what you are getting in web development. Building locally or on the CI takes up momentum and sometimes can push you out of the flow, decreasing overall productivity.
 
 Luckily there are a couple of improvements for build time.
 
 # Why build the same things over and over again?
 
 > “Insanity is doing the same thing over and over and expecting different results.”
-Albert Einstein, probably
+> Albert Einstein, probably
 
 If you process the same input, using the fixed process and configuration, you normally can expect the same output. This optimization idea is used in many places. The most basic would be caching: save the web page generated in the cache, to serve it again if requested again. This idea lays the foundation for something called hermetic build systems like [Bazel](https://bazel.build/basics/hermeticity). So if building the same source files with the same compiler, we should get the same binaries.
 
@@ -45,7 +45,7 @@ We'll move from using external dependencies compiled by SPM on the build time to
 
 ## Let's get building
 
-The first step would be to define the `Cartfile`, which is just a Carthage way of defining the list of dependencies. 
+The first step would be to define the `Cartfile`, which is just a Carthage way of defining the list of dependencies.
 
 You can see the list of the packages your project relies on in the Project preferences pane, inside Xcode.
 
@@ -66,7 +66,7 @@ Yes, but wait to see the full picture, we will only need to use Carthage when we
 
 Carthage can be installed from homebrew, using `brew install carthage`.
 
-Then you'll need to run `carthage bootstrap --use-xcframeworks --platform <Your platform, for exmaple iOS>`.  Carthage would then fetch your dependencies defined in `Cartfile` and sub-dependencies. Then it would find binaries for them (if provided) or would compile them from sources. In the end, you would get all of them compiled into `XCFramework` format.
+Then you'll need to run `carthage bootstrap --use-xcframeworks --platform <Your platform, for exmaple iOS>`. Carthage would then fetch your dependencies defined in `Cartfile` and sub-dependencies. Then it would find binaries for them (if provided) or would compile them from sources. In the end, you would get all of them compiled into `XCFramework` format.
 
 ### Expose the frameworks to Swift Package Manager
 
@@ -125,7 +125,7 @@ Carthage is going to put the frameworks to `Carthage/Build`. This is where we ca
 
 ### Git LFS
 
-[Git LFS](https://git-lfs.com) is a Git extension intended to make it easier to keep large-ish files in Git. Certainly, it's possible to just add such files to Git normally, but it is not the best idea as it would make your repo bigger and bigger the more versions of a given file you would add. 
+[Git LFS](https://git-lfs.com) is a Git extension intended to make it easier to keep large-ish files in Git. Certainly, it's possible to just add such files to Git normally, but it is not the best idea as it would make your repo bigger and bigger the more versions of a given file you would add.
 
 Installing and using Git LFS is extremely easy:
 
@@ -176,7 +176,7 @@ let package = Package(
     targets: [
         .target(
             name: "CommonUI",
-            dependencies: [                
+            dependencies: [
               .product(name: "SDWebImage", package: "Contrib"),
             ],
             path: "Sources"
