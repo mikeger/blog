@@ -19,7 +19,7 @@ If you are a mobile engineer like me, you could not be more excited about the Ap
 
 Luckily there are a couple of improvements for build time.
 
-# Why build the same things over and over again?
+## Why build the same things over and over again?
 
 > “Insanity is doing the same thing over and over and expecting different results.”
 > Albert Einstein, probably
@@ -30,11 +30,11 @@ I am not ~~crazy~~brave enough to move from the vendor build system. Let's see w
 
 Looking at the build logs and build timeline available in Xcode 14, I see that from the 10 minutes it takes to compile my project, around half of the time is spent building external dependencies. Taking in account that I don't change the versions of those dependencies that frequently, wouldn't it be great not to recompile them? Especially annoying here for me personally is that Firebase is always rebuilding the protobuf library every time. Wait, I am sure I've seen this before. Was it in the Simpsons?
 
-## Reinventing carthage
+### Reinventing carthage
 
 No, it was not in the Simpsons, but I can clearly remember it. [Carthage](https://github.com/Carthage/Carthage) allows this. Carthage is another package management tool that was created before SwiftPM. Carthage is building external dependencies and packaging them as binary XCFrameworks. Why not use it?
 
-## High-level overview
+### High-level overview
 
 We'll move from using external dependencies compiled by SPM on the build time to using pre-compiled versions of the same dependencies:
 
@@ -43,7 +43,7 @@ We'll move from using external dependencies compiled by SPM on the build time to
 3. Package all dependencies in your repo using git-lfs
 4. Add logic to unpack the dependencies if needed
 
-## Let's get building
+### Let's get building
 
 The first step would be to define the `Cartfile`, which is just a Carthage way of defining the list of dependencies.
 
@@ -62,13 +62,13 @@ But wait, would this mean we will be using two different package managers?
 
 Yes, but wait to see the full picture, we will only need to use Carthage when we would need to change the libraries' versions.
 
-### Install and run Carthage
+#### Install and run Carthage
 
 Carthage can be installed from homebrew, using `brew install carthage`.
 
 Then you'll need to run `carthage bootstrap --use-xcframeworks --platform <Your platform, for exmaple iOS>`. Carthage would then fetch your dependencies defined in `Cartfile` and sub-dependencies. Then it would find binaries for them (if provided) or would compile them from sources. In the end, you would get all of them compiled into `XCFramework` format.
 
-### Expose the frameworks to Swift Package Manager
+#### Expose the frameworks to Swift Package Manager
 
 `XCFramework` is nice, but if you are using Swift Package Manager for local modules you would need to do one additional step: create a package that would expose those dependencies. This is necessary since you cannot declare a dependency on a bare framework in your file system: it has to be declared as a Swift Package Manager package.
 
@@ -117,13 +117,13 @@ Root
 └── setup.sh
 ```
 
-### Package and store the binary frameworks
+#### Package and store the binary frameworks
 
 Carthage is going to put the frameworks to `Carthage/Build`. This is where we can take them and archive them:
 
 `tar cvzf Contrib.tar.gz Carthage/Build`
 
-### Git LFS
+#### Git LFS
 
 [Git LFS](https://git-lfs.com) is a Git extension intended to make it easier to keep large-ish files in Git. Certainly, it's possible to just add such files to Git normally, but it is not the best idea as it would make your repo bigger and bigger the more versions of a given file you would add.
 
@@ -141,7 +141,7 @@ git lfs track Contrib.tar.gz
 git add .gitattributes
 ```
 
-### Prepare the frameworks for use
+#### Prepare the frameworks for use
 
 We need to think of other engineers who would be interacting with the repository, so it's a good idea to create a setup script that would make sure Git LFS extension is installed and would pull the dependencies file:
 
@@ -153,7 +153,7 @@ git lfs pull
 tar -xvf Contrib.tar.gz
 ```
 
-### Refering from Swift Package Manager
+#### Refering from Swift Package Manager
 
 Since we have `Package.swift` now, we can refer from local Swift packages or Xcode projects to our binary frameworks. In your local package, it would look like this:
 
@@ -185,7 +185,7 @@ let package = Package(
 )
 ```
 
-## Bottomline
+### Bottomline
 
 As a result of this exercise, our team decreased the CI build and test time from 11 to 6 minutes. This has a significant effect on multiple verticals:
 
@@ -195,7 +195,7 @@ As a result of this exercise, our team decreased the CI build and test time from
 - Since it is faster to build the project locally, there is less chance for an engineer to lose focus,
 - Satisfaction from not rebuilding Firebase over and over: priceless.
 
-# Q&A
+## Q&A
 
 QQ: Should one consider switching to Carthage altogether?
 
