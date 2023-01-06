@@ -28,15 +28,15 @@ If you process the same input, using the fixed process and configuration, you no
 
 I am not ~~crazy~~brave enough to move from the vendor build system. Let's see what is possible to achieve in the world of **Swift package manager** with the existing tools.
 
-Looking at the build logs and build timeline available in Xcode 14, I see that from the 10 minutes it takes to compile my project, around half of the time is spent building external dependencies. Taking in account that I don't change the versions of those dependencies that frequently, wouldn't it be great not to recompile them? Especially annoying here for me personally is that Firebase is always rebuilding the protobuf library every time. Wait, I am sure I've seen this before. Was it in the Simpsons?
+Looking at the build logs and build timeline available in Xcode 14, I see that from the 10 minutes it takes to compile my project, around half of the time is spent building external dependencies. Taking in account that I don't change the versions of those dependencies that frequently, wouldn't it be great not to recompile them? Especially annoying here for me personally is that Firebase is always rebuilding the protobuf library every time. Wait, I am sure I've seen this before. Where was it?
 
-### Reinventing carthage
+### Reinventing Carthage
 
-No, it was not in the Simpsons, but I can clearly remember it. [Carthage](https://github.com/Carthage/Carthage) allows this. Carthage is another package management tool that was created before SwiftPM. Carthage is building external dependencies and packaging them as binary XCFrameworks. Why not use it?
+Now I can clearly remember it. [Carthage](https://github.com/Carthage/Carthage) allows this. Carthage is another package management tool that was created before SwiftPM. Carthage is building external dependencies and packaging them as binary XCFrameworks. Why not use it?
 
 ### High-level overview
 
-We'll move from using external dependencies compiled by SPM on the build time to using pre-compiled versions of the same dependencies:
+We'll move from using external dependencies compiled by SPM at build time to using pre-compiled versions of the same dependencies:
 
 1. Define external dependencies in the Cartfile
 2. Build external dependencies to XCFramework
