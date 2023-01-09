@@ -10,8 +10,9 @@ published: false
 <Image
   alt={`Pre-canned food`}
   src={`/images/cache-spm/cover.jpg`}
-  width={1280}
-  height={1920}
+  width={320}
+  height={480}
+  layout={"fixed"}
   priority
 />
 
@@ -119,9 +120,11 @@ Root
 
 #### Package and store the binary frameworks
 
-Carthage is going to put the frameworks to `Carthage/Build`. This is where we can take them and archive them:
+Carthage is going to put the frameworks to `Carthage/Build`. This is where we can take them and archive them. As an example, you can use [tar](https://support.apple.com/en-gb/guide/terminal/apdc52250ee-4659-4751-9a3a-8b7988150530/mac) command:
 
-`tar cvzf Contrib.tar.gz Carthage/Build`
+```bash
+tar cvzf Contrib.tar.gz Carthage/Build
+```
 
 #### Git LFS
 
@@ -143,10 +146,9 @@ git add .gitattributes
 
 #### Prepare the frameworks for use
 
-We need to think of other engineers who would be interacting with the repository, so it's a good idea to create a setup script that would make sure Git LFS extension is installed and would pull the dependencies file:
+We need to think of other engineers who would be interacting with the repository. It's a good idea to create a setup script that would make sure the Git LFS extension is installed and would pull the dependencies file. I will use tar as an example here again:
 
 ```bash
-echo "Installing binary third-party libraries"
 brew install git-lfs
 git lfs install
 git lfs pull
@@ -197,19 +199,17 @@ As a result of this exercise, our team decreased the CI build and test time from
 
 ## Q&A
 
-QQ: Should one consider switching to Carthage altogether?
+#### QQ: Should one consider switching to Carthage altogether?
 
 In my opinion no, because Swift PM allows for modularization.
 
-QQ: Why use XCFramework format, specifically?
+#### QQ: Why use XCFramework format, specifically?
 
 This format, in comparison to a regular `framework`, allows the packaging of several binaries of the same architecture for different SDKs. In practice, this means Apple Silicon simulator support.
 
-QQ: Any additional effect from this?
+#### QQ: Any additional effect from this?
 One of the effects of this optimization is that the dependencies are now dynamic frameworks. This has pros and cons:
 
 - If you have multiple targets, every target would be able to link to the frameworks without growing in size. Static frameworks would be included in every target multiplying the size.
 
 - Dynamic frameworks negatively affect your app's startup time. iOS is taking some time to load dynamic libraries on the app startup.
-
-<!-- Why run tests for the code you haven't changed?  -->
