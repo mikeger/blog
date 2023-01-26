@@ -397,7 +397,7 @@ In my opinion no, because Swift PM allows for modularization.
 
 ## QQ: Why use XCFramework format, specifically?
 
-This format, in comparison to a regular `framework`, allows the packaging of several binaries of the same architecture for different SDKs. In practice, this means Apple Silicon simulator support.
+This format, in comparison to a regular `framework`, allows the packaging of several binaries of the same SDK for different architectures. In practice, this means Apple Silicon simulator support.
 
 ---
 
