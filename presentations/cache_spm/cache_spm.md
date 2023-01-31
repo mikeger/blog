@@ -26,11 +26,20 @@ h1, h2, h3 {
 }
 </style>
 
-# Caching external SPM packages
+# 
+#
+#
+#
+#
+#
+#
+#
+#
 
-Cocoaheads Berlin January 2023
+# <span style="background-color:white;">Caching external SPM packages</span>
+<span style="background-color:white;">Cocoaheads Berlin January 2023</span>
 
-![center h:350](images/cover.jpg)
+![bg](images/cover.png)
 
 ---
 
@@ -137,6 +146,7 @@ Looking at the build logs and build timeline available in Xcode 14, I see that f
 ## Why build the same things over and over again?
 
 > “Insanity is doing the same thing over and over and expecting different results.”
+
 Albert Einstein
 
 ![bg right:33%](images/cpu.png)
