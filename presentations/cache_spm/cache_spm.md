@@ -76,7 +76,7 @@ I am a Staff iOS engineer at Delivery Hero Logistics:
 - Available in 75 countries
 - Serving 1M delivery drivers monthly
 
-We are constantly hiring mobile engineers. Reach out if you are interested. Or apply [here](https://careers.deliveryhero.com/global/en/job/JR0032021/Staff-iOS-Engineer-f-m-d-Client-Foundation).
+We are constantly hiring mobile engineers. Reach out if you are interested. Or apply at https://careers.deliveryhero.com
 
 ---
 
@@ -143,7 +143,7 @@ Looking at the build logs and build timeline available in Xcode 14, I see that f
 
 ---
 
-## Why build the same things over and over again?
+# Why build the same things over and over again?
 
 > “Insanity is doing the same thing over and over and expecting different results.”
 
@@ -153,7 +153,7 @@ Albert Einstein
 
 ---
 
-## Same Input + Same Process = Same Output
+# Same Input + Same Process = Same Output
 
 This optimization idea is used in many places. So when building the same source files with the same compiler, we should get the same binaries. 
 
