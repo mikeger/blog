@@ -313,6 +313,34 @@ In case the change is not relevant to the code, build takes only 2 minutes.
 
 ---
 
+![](images/stats-chart.png)
+
+---
+
+# CI Impact
+
+| | |
+|:----|----|
+| Saved to date (2022) | 67 CI days |
+| Projected saving in the next years | 124 CI days per year |
+| CI price saved to date (2022) | ca. 5.000 EUR |
+| Projected saving in the next years | ca. 10.000 EUR per year |
+| CO₂ emissions saved to date (2022) | ca. 60 kg |
+| Projected saving in the next years | ca. 120 kg per year |
+
+---
+
+# Engineer Productivity Impact
+
+| | |
+|:----|----|
+| Saved to date (2022) | 67 work days |
+| Projected saving in the next years | 124 work days per year |
+| CI price saved to date (2022) | ca. 128.000 EUR |
+| Projected saving in the next years | ca. 237.000 EUR per year |
+
+---
+
 # Going forward (Vision)
 
 ## Build performance
