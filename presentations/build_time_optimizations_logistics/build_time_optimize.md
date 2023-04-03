@@ -36,7 +36,7 @@ h1, h2, h3 {
 #
 #
 
-# <span style="background-color:white;">&nbsp;Mike Gerasymenko, Rider Transmission &nbsp;</span>
+# <span style="background-color:white;">&nbsp;Mike Gerasymenko — Logistics, Deliveries&nbsp;</span>
 # <span style="background-color:white;">&nbsp;iOS CI build performance optimizations &nbsp;</span>
 
 ![bg](images/cover.png)
@@ -338,6 +338,16 @@ In case the change is not relevant to the code, build takes only 2 minutes.
 | Projected saving in the next years | 124 work days per year |
 | CI price saved to date (2022) | ca. 128.000 EUR |
 | Projected saving in the next years | ca. 237.000 EUR per year |
+
+_This is the upper bound, asssuming engineers would work instead of waiting for the build_
+
+![bg right:33% 90%](images/compiling.png)
+
+---
+
+# NB
+
+Right now on iOS we are stabilizing UI tests, so running those is adding an additional time to PR checks. After the tests are stable we would work on streamlining the workflow again.
 
 ---
 

@@ -1,0 +1,175 @@
+---
+title: 'Self-Hosted Sentry: iOS system frames de-symbolication'
+description: >-
+    How to set up self-hosted Sentry for system frames de-symbolication on iOS.
+date: '2023-04-03'
+image: /images/sentry-symbols/sentry.svg
+published: true
+---
+
+<Image
+  alt={`Sentry`}
+  src={`/images/sentry-symbols/sentry.svg`}
+  width={720}
+  height={540}
+  priority
+/>
+
+### Introduction
+
+Sentry is an application performance and error tracking tool. It is available as a SaaS product and can be self-hosted. Sentry can be used to track errors and crashes in mobile applications. Sentry can also be used to track performance metrics such as memory usage, CPU usage, and network usage.
+
+In this article, we will go through the steps required to set up a self-hosted Sentry for system frames de-symbolication on iOS. 
+
+People use self-hosted Sentry to have it fine tuned for their needs and to have more control over the data. Additionally, it can be cheaper to run self-hosted Sentry than to use the SaaS product.
+
+Cloud-based Sentry has the system symbols available for de-symbolication. However, self-hosted Sentry does not have the system symbols available. This article will show you how to set up self-hosted Sentry to de-symbolicate the system frames.
+
+This core building block is in my opinion required for any self-hosted Sentry instance. It allows you to see the method names of the system frameworks in your stack traces.
+
+Default self-hosted Sentry allows you to de-symbolicate the frames in the application code. However, it does not allow you to de-symbolicate the frames in the system frameworks. This is because the system frameworks are not part of the application bundle. They are part of the operating system, and they are different for different operating system releases.
+
+### Prerequisites
+
+- Running self-hosted Sentry instance
+- S3 bucket to store the de-symbolication information
+
+### What is de-symbolication
+
+When an application is crashing, the operating system collects the stack trace of the crash. The stack trace contains the addresses of the methods that were executed when the crash happened. The stack trace is then sent to Sentry. Sentry then tries to de-symbolicate the stack trace. De-symbolication is the process of converting the addresses to method names. This allows you to see the method names in the stack trace.
+
+For your application, Xcode is creating a mapping file that maps the addresses to the method names. This mapping file is then uploaded to Sentry. When Sentry receives a crash report, it uses the mapping file to de-symbolicate the stack trace.
+
+For the system frameworks, there is no mapping file. The system frameworks are part of the operating system.
+
+<Image
+  alt={`Symbolicated crash: symbols for UIKit are missing`}
+  src={`/images/sentry-symbols/not-symbolicated.png`}
+  width={1404}
+  height={196}
+  priority
+/>
+
+### How Sentry is de-symbolicating crashes
+
+Sentry is using a special service called [Symbolicator](https://github.com/getsentry/symbolicator) to de-symbolicate the stack traces. Symbolicator is a standalone service that can be run independently from Sentry. It is also possible to run Symbolicator as a part of Sentry. In this article, we will be running Symbolicator as a part of Sentry.
+
+## Setting it up
+
+### Procuring the system frameworks
+
+I could not find any official way to download the system frameworks. It is possible to acquire them using Xcode. If you connect a device running a certain iOS version to your computer, Xcode is going to fetch the system frameworks to your machine (in `/Library/Developer/Xcode/iOS\ DeviceSupport`). However, I found a [GitHub repository](https://github.com/CXTretar/iOS-System-Symbols-Supplement) that contains the system frameworks for iOS 12. I downloaded the repository and extracted the system frameworks from it.
+
+I am unaware of the licensing implications of copying the system symbols, but I think it is fine unless you are not distributing them. I hope eventually there would be a public repository that engineers could access.
+
+<Image
+  alt={`A lot of archived symbols downloading`}
+  src={`/images/sentry-symbols/download.png`}
+  width={506}
+  height={556}
+  priority
+/>
+
+The total size of all symbols for iOS 12 to iOS 16.3 is about 60 gigabytes, so you might need to empty your Derived Data folder before downloading and unarchiving them.
+
+### Sorting symbols to a unified format
+
+Sentry created a special tool to sort existing OS-provided symbol information into a unified format. This tool is called [symsorter](https://github.com/getsentry/symbolicator/tree/master/crates/symsorter). It is a Rust binary that can be compiled and run on your machine. 
+
+#### Building Sorter
+
+You need to have Rust installed on your machine. You can install Rust using [homebrew](https://brew.sh):
+
+```bash
+brew install rust
+```
+
+Then you need to check out the symbolicator repository:
+
+```bash
+git clone git@github.com:getsentry/symbolicator.git
+```
+
+Once you have Rust installed, you can build the symsorter binary by running the following command:
+
+```bash
+cd symbolicator/crates/symsorter
+cargo build --release
+```
+
+This will create a binary in `symbolicator/target/release/symsorter`. You can copy it to your path or run it from the current directory.
+
+### Sorting
+
+In order to sort symbols, you need to create an empty folder on your local machine, for example `~/ios_symbols`.
+ 
+Then you need to run the following command:
+
+```bash
+symbolicator/target/release/symsorter -zz -o ~/ios_symbols --prefix ios --bundle-id 16.3.1-arm64e ~/Downloads/16.3.1\ \(20D67\)\ arm64e
+```
+
+You need to run it for every symbol file you have. In my case, I have a whopping 129 symbol files. I have created a bash script to run the command for every symbol file:
+
+```bash
+#!/bin/bash
+
+find . -type d -maxdepth 1 -print0 | while read -d $'\0' file
+do
+ echo "Processing $file"
+ path=`echo $file | sed -E 's/^\.\/([0-9\.]*) \(([A-Z0-9]*)\) ?(arm64.)?/\1-\2-\3/'`
+ echo "path: $path"
+
+ ../symbolicator/target/release/symsorter -zz -o ../sorted_symbols --prefix ios --bundle-id "$path" "$file"
+done
+```
+
+You run this script in the folder where you have extracted the system frameworks. It will create a folder called `sorted_symbols` with the sorted symbols. This would take a while, and your CPU would do Brrr.
+
+<Image
+  alt={`CPU load using symbolicator: Brrrr`}
+  src={`/images/sentry-symbols/brrr.png`}
+  width={269}
+  height={467}
+  priority
+/>
+
+### Uploading symbols to S3
+
+As mentioned above, you need to provide an S3 bucket to host the sorted symbols. You can create an S3 bucket using the AWS console.
+
+Then you need to upload the sorted symbols to the S3 bucket. You can use the AWS console or the AWS CLI. I have used the AWS CLI to upload the symbols:
+
+```bash
+aws s3 sync ../sorted_symbols s3://sentry-symbols/
+```
+
+### Configuring Sentry to use the symbols
+
+In order to configure yout Sentry instance to use the symbols you need to open your project preferences (open your project -> Cogwheel on the right) and go to the Processing -> Debug Files section.
+
+Then in Custom repositories select "Add Repository" and enter the needed information:
+
+<Image
+  alt={`Configuration`}
+  src={`/images/sentry-symbols/configuration.png`}
+  width={1354}
+  height={2010}
+  priority
+/>
+
+## Conclusion
+
+<Image
+  alt={`Voila`}
+  src={`/images/sentry-symbols/voila.png`}
+  width={1346}
+  height={244}
+  priority
+/>
+
+Nice, now you can see the method names of the system frameworks in your stack traces. This is a great step towards better crash reports. 
+
+NB: As Apple is going to release new iOS versions going forward, there would be a need to add new symbols to the S3 bucket. I am not sure how to automate this process, but I am sure it is possible. Most of the time it would be possible to collect the new symbols by updating your phone to the latest iOS version and connecting it to Xcode.
+
+I hope this article was helpful. If you have any questions, feel free to reach out to me on Twitter: [@gk0io](https://twitter.com/gk0io).
