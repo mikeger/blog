@@ -335,6 +335,28 @@ img[alt~="center"] {
 
 ---
 
+# Benefits
+
+We observed 40-50% average CI time reduction when using XcodeSelectiveTesting
+
+![](images/test-changed-stats-build.png)
+
+---
+
+![](images/test-changed-stats.png)
+
+---
+
+# Why testing fast and precise is important?
+
+![bg right width:480](images/compiling.png)
+
+- Faster CI run means consuming less natural resources
+- Local test runs are saving developer hours
+<!-- _header: '' -->
+
+---
+
 # Integration: Demo
 
 ---
