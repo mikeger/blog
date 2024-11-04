@@ -1,0 +1,293 @@
+---
+title: 'Optimizing Asset Catalog Compilation in CocoaPods for Faster iOS Builds'
+description: >-
+  Efficient asset management is crucial for maintaining optimal build times in iOS development. Asset catalogs (`.xcassets`) are central to this process, but default behaviors in tools like CocoaPods can lead to unnecessary recompilation, slowing down your development cycle.
+date: '2024-11-01'
+image: /images/catalog.jpg
+published: true
+---
+
+Efficient asset management is crucial for maintaining optimal build times in iOS development. Asset catalogs (`.xcassets`) are central to this process, but default behaviors in tools like CocoaPods can lead to unnecessary recompilation, slowing down your development cycle.
+
+In this post, I'll delve into how asset catalogs are handled during the build process, the inefficiencies introduced by CocoaPods' default resource packaging logic, and how to optimize this process to achieve significantly faster incremental builds.
+
+---
+
+## Understanding Asset Catalogs and CocoaPods
+
+### What Are Asset Catalogs?
+
+Asset catalogs (`.xcassets`) are collections of assets such as images, icons, and colors used in an iOS application. During the build process, these catalogs are compiled into a binary-optimized format using a tool called `actool`. This compilation ensures that assets are efficiently packaged for the app.
+
+### The Role of `actool`
+
+`actool` is a command-line utility provided by Xcode that compiles asset catalogs into a format that the app can use at runtime. It also handles the extraction of the app's main icon during the build phase.
+
+### Asset Catalog Compilation
+
+If an application has multiple asset catalogs, `actool` compiles them together into a single binary asset catalog embedded in the application. This process is crucial for the app to access its assets efficiently.
+
+### How CocoaPods Handles Resources
+
+[CocoaPods](https://cocoapods.org/) is a dependency management system for Swift and Objective-C projects. It simplifies integrating third-party libraries into your app. When dealing with resources, CocoaPods must manage packages (pods) that provide assets, sometimes compiling them into bundles or including them directly in the main application's asset catalog.
+
+---
+
+## The Problem: Inefficient Asset Catalog Compilation
+
+### Default Resource Packaging Logic
+
+CocoaPods generates a resource copy script named `Pods-<Target_Name>-resources.sh` for each target. This script is called on every build and contains logic to package resources from dependencies. However, this logic is minimal and introduces inefficiencies, particularly with asset catalogs.
+
+### Recompilation on Every Build
+
+By default, CocoaPods lacks logic to prevent recompiling the asset catalog when the original resources haven't changed. Consequently, the asset catalog is rebuilt on every build, including incremental ones where no assets have been modified. This unnecessary recompilation increases build times and reduces productivity.
+
+### Redundancy in Resource Packaging
+
+The default packaging logic has double redundancy:
+
+1. **Always Recompiling the Binary Asset Catalog**: Regardless of changes, the asset catalog is compiled every time.
+2. **Packaging Resources Twice**: Resources are included both in the bundles for local modules and again in the main module.
+
+### Naming Collisions
+
+Asset catalogs share a global naming domain. If assets in different catalogs have the same name, the final binary asset catalog can only include one of them, leading to undefined behavior regarding which asset is used.
+
+---
+
+## A Practical Example
+
+Consider the following folder structure:
+
+```
+root_folder
+|-- ExternalModules
+|   |-- Module1
+|   |   |-- Assets.xcassets
+|   |-- Module2
+|   |   |-- Assets.xcassets
+|   |-- Module3
+|   |   |-- Assets.xcassets
+|-- Sources
+|   |-- resources
+|   |   |-- Assets.xcassets
+```
+
+### Initial Resource Collection
+
+Initially, resources are collected via the `install_resource` bash function in the resource copy script. Notice how the contents of the `.xcassets` catalogs are listed as individual files:
+
+```bash
+install_resource "${PODS_ROOT}/../ExternalModules/SpendingLimit/Sources/SpendingLimit/Resources/Assets.xcassets/info-icon-blue.imageset/Contents.json"
+install_resource "${PODS_ROOT}/../ExternalModules/SpendingLimit/Sources/SpendingLimit/Resources/Assets.xcassets/info-icon.imageset/Contents.json"
+install_resource "${PODS_ROOT}/../ExternalModules/SpendingLimit/Sources/SpendingLimit/Resources/Assets.xcassets/shopping-power-icon1.imageset/Contents.json"
+install_resource "${PODS_ROOT}/../ExternalModules/SpendingLimit/Sources/SpendingLimit/Resources/Assets.xcassets/shopping-power-icon2.imageset/Contents.json"
+install_resource "${PODS_ROOT}/../ExternalModules/SpendingLimit/Sources/SpendingLimit/Resources/Assets.xcassets/shopping-power-icon3.imageset/Contents.json"
+install_resource "${PODS_ROOT}/../ExternalModules/SpendingLimit/Sources/SpendingLimit/Resources/Localizable/ar.lproj/Localizable.strings"
+install_resource "${PODS_ROOT}/../ExternalModules/SpendingLimit/Sources/SpendingLimit/Resources/Localizable/en.lproj/Localizable.strings"
+install_resource "${PODS_ROOT}/../ExternalModules/SpendingLimit/Sources/SpendingLimit/Resources/Assets.xcassets"
+```
+
+The call to `install_resource` with an `.xcassets` argument stores the asset in the `XCASSET_FILES` array.
+
+### CocoaPods Resource Copy Script
+
+At the end of the script, CocoaPods scans for all `.xcassets` files—even those not included in the packages:
+
+```bash
+if [[ -n "${WRAPPER_EXTENSION}" ]] && [ "`xcrun --find actool`" ] && [ -n "${XCASSET_FILES:-}" ]
+then
+  # Find all other xcassets (this unfortunately includes those of path pods and other targets).
+  OTHER_XCASSETS=$(find -L "$PWD" -iname "*.xcassets" -type d)
+  while read line; do
+    if [[ $line != "${PODS_ROOT}*" ]]; then
+      XCASSET_FILES+=("$line")
+    fi
+  done <<<"$OTHER_XCASSETS"
+
+  if [ -z ${ASSETCATALOG_COMPILER_APPICON_NAME+x} ]; then
+    printf "%s\0" "${XCASSET_FILES[@]}" | xargs -0 xcrun actool \
+    --output-format human-readable-text --notices --warnings \
+    --platform "${PLATFORM_NAME}" --minimum-deployment-target "${!DEPLOYMENT_TARGET_SETTING_NAME}" \
+    ${TARGET_DEVICE_ARGS} --compress-pngs \
+    --compile "${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}"
+  else
+    printf "%s\0" "${XCASSET_FILES[@]}" | xargs -0 xcrun actool \
+    --output-format human-readable-text --notices --warnings \
+    --platform "${PLATFORM_NAME}" --minimum-deployment-target "${!DEPLOYMENT_TARGET_SETTING_NAME}" \
+    ${TARGET_DEVICE_ARGS} --compress-pngs \
+    --compile "${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}" \
+    --app-icon "${ASSETCATALOG_COMPILER_APPICON_NAME}" \
+    --output-partial-info-plist "${TARGET_TEMP_DIR}/assetcatalog_generated_info_cocoapods.plist"
+  fi
+fi
+```
+
+In this script:
+
+- CocoaPods tries to predict which `.xcassets` belong to the current project by scanning all folders.
+- There's no logic to prevent rebuilding if assets haven't changed.
+- The script doesn't discern between assets belonging to different targets, leading to redundancy and potential naming collisions.
+
+---
+
+## The Solution: Optimizing Asset Catalog Compilation
+
+To address these inefficiencies, we can modify the resource copy script to prevent unnecessary recompilation and reduce redundancy.
+
+### Overview of Optimizations
+
+1. **Check if Asset Catalogs Have Changed**: Use an external script to determine if recompilation is necessary.
+2. **Ensure App Icon Extraction**: Even if assets haven't changed, the app icon must still be exported.
+3. **Ignore Assets from External Modules**: Exclude `.xcassets` from `ExternalModules` to avoid redundancy.
+4. **Modify Search Paths**: Search for `.xcassets` only in the main `Sources` folder.
+
+### Step 1: Checking for Asset Changes
+
+I introduce an external script `Scripts/check_xcassets_changed.sh` that checks whether the asset catalogs have changed since the last build. This script uses `mtree`, a macOS tool that creates a checksum of a directory.
+
+#### `Scripts/check_xcassets_changed.sh` Script
+
+```bash
+any_mtree_created=false
+
+# Locate all xcassets files
+for fn in `find -L "$PWD" -path "$PWD/ExternalModules/*.xcassets" -o -path "$PWD/Sources/*.xcassets" -type d`; do
+    echo "Checking $fn"
+    sha=$(echo -n "$fn" | shasum -a 256 | head -c 40)
+    filename=$(basename -- "$fn")
+    mtreefile="${BUILT_PRODUCTS_DIR}/.mtree.$sha.$filename"
+    
+    # Check if checksum file exists
+    if [ ! -f "$mtreefile" ]; then
+        echo "Creating snapshot for $fn..."
+        # Create checksum file
+        mtree -c -K sha256digest -p "$fn" > "$mtreefile"
+        any_mtree_created=true
+    else 
+        echo "Comparing $fn..."
+        # Compare existing tree against the checksum file
+        if ! mtree -f "$mtreefile" -K sha256digest -p "$fn"; then
+            echo "Changes detected in $fn"
+            # Recreate the checksum
+            mtree -c -K sha256digest -p "$fn" > "$mtreefile"
+            exit 1
+        fi
+    fi
+done
+
+if [[ $any_mtree_created == true ]]; then
+    echo "New mtree files created, indicating change"
+    exit 1
+fi
+```
+
+This script:
+
+- Finds all `.xcassets` files belonging to the main target.
+- Generates or updates checksum files for each asset catalog.
+- Determines whether recompilation is necessary based on checksum comparisons.
+
+### Step 2: Ensuring App Icon Extraction
+
+Even if the asset catalogs haven't changed, we need to ensure that the app icon is correctly exported. We modify the script to handle this separately.
+
+### Step 3: Ignoring External Module Assets
+
+We adjust the script to ignore `.xcassets` from the `ExternalModules` folder, as they are included in the bundles for local dependencies, avoiding redundancy and naming collisions.
+
+### Step 4: Modifying Search Paths
+
+We modify the search paths in the script to look for `.xcassets` only in the main `Sources` folder, excluding unnecessary directories.
+
+---
+
+## Patching the Resource Copy Script
+
+We apply the optimizations directly to the `Pods-<Target_Name>-resources.sh` script during the execution of the `pod install` command. The code to patch the script is as follows:
+
+```ruby
+# Patch "*-resources.sh" scripts to include optimized xcassets caching logic
+resources_sh_files = [installer_representation.sandbox.root.join("Target Support Files/Pods-<TARGET NAME>/Pods-<TARGET NAME>-resources.sh")]
+puts "Patching *-resources.sh scripts"
+
+resources_sh_files.each do |resources_sh_file|
+    script = File.read(resources_sh_file)
+    File.open(resources_sh_file, 'w') do |f|
+        # Step 1: Insert the script to check if asset catalog recompilation is necessary
+        script = script.gsub(
+            'if [[ -n "${WRAPPER_EXTENSION}" ]] && [ "`xcrun --find actool`" ] && [ -n "${XCASSET_FILES:-}" ]',
+            'if ! sh "${PODS_ROOT}/../Scripts/check_xcassets_changed.sh"; then
+    echo "XCAssets changed, processing..."
+                
+if [[ -n "${WRAPPER_EXTENSION}" ]] && [ "`xcrun --find actool`" ] && [ -n "${XCASSET_FILES:-}" ]'
+        )
+        # Step 2: Insert the logic to update app icon
+        script = script.gsub(
+            'assetcatalog_generated_info_cocoapods.plist"
+  fi
+fi',
+            'assetcatalog_generated_info_cocoapods.plist"
+  fi
+fi
+else
+    echo "XCAssets not changed, skipping..."
+fi
+                
+/usr/libexec/PlistBuddy -x -c "Merge \'${TARGET_TEMP_DIR}/assetcatalog_generated_info_cocoapods.plist\'" "${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Info.plist"'
+        )
+        # Step 3: Skip xcassets from modules
+        script = script.gsub(
+            'install_resource()
+{',
+            'install_resource()
+{
+  [[ "$1" == *"ExternalModules"* && "$1" == *.xcassets ]] && { echo "Skipping $1"; return; }'
+        )
+        # Step 4: Search for assets in Sources
+        script = script.gsub(
+            'OTHER_XCASSETS=$(find -L "$PWD" -iname "*.xcassets" -type d)',
+            'OTHER_XCASSETS=$(find -L "${PODS_ROOT}/../Sources/" -iname "*.xcassets" -type d)'
+        )
+        f.puts(script)
+        puts "Patched #{resources_sh_file}"
+    end
+end
+```
+
+This code:
+
+- **Step 1**: Inserts the check for asset changes using the external script.
+- **Step 2**: Ensures the app icon is updated even if assets haven't changed.
+- **Step 3**: Skips `.xcassets` from `ExternalModules` during resource installation.
+- **Step 4**: Adjusts the search path to include only the main `Sources` folder.
+
+---
+
+## Results and Benefits
+
+Implementing these optimizations led to significant improvements:
+
+- **Reduced Rebuild Time**: Build times decreased from **20 seconds** to **8 seconds** for incremental builds.
+- **No Impact on CI Builds**: Continuous Integration (CI) builds remain unaffected since they build the app from scratch each time.
+- **Avoided Naming Collisions**: By excluding assets from `ExternalModules`, we reduced the risk of naming collisions in the final binary asset catalog.
+- **Streamlined Asset Compilation**: Only necessary assets are compiled, enhancing efficiency.
+
+---
+
+## Conclusion
+
+Optimizing asset catalog compilation in your iOS projects can lead to substantial improvements in build times and developer productivity. By customizing the resource copy script generated by CocoaPods and implementing a mechanism to detect changes in assets, we can prevent unnecessary recompilation and eliminate redundancy.
+
+If you're experiencing long build times due to asset catalog compilation, consider implementing these optimizations. Not only will you save time, but you'll also create a more efficient and maintainable build process.
+
+---
+
+**References:**
+
+- [CocoaPods Official Documentation](https://guides.cocoapods.org/)
+- [Apple Developer Documentation on Asset Catalogs](https://developer.apple.com/library/archive/documentation/Xcode/Reference/xcode_ref-Asset_Catalog_Format/)
+- [mtree Utility Manual](https://www.freebsd.org/cgi/man.cgi?mtree(8))
+- Photo by <a href="https://unsplash.com/@erol?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Erol Ahmed</a> on <a href="https://unsplash.com/photos/close-up-photography-of-brown-wooden-card-catalog-Y3KEBQlB1Zk?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>
+  
