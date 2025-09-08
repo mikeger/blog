@@ -20,6 +20,8 @@
 *   iOS Developer since 2009
 *   Master of Applied Mathematics
 
+![bg right:33%](images/mike_hat.jpg)
+
 ---
 
 <!-- map: center=[13.4050, 52.5200] zoom=10 -->
@@ -30,7 +32,7 @@
 *   Developing the Rider application
 *   Used in ~70 countries worldwide
 
-![Brands Placeholder](https://via.placeholder.com/400x100.png?text=Delivery+Hero+Brands)
+![bg right:33%](images/brands.png)
 
 ---
 
