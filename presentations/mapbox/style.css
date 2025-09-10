@@ -40,27 +40,10 @@ body {
 
 #content-overlay {
     position: absolute;
-    bottom: 20px;
+    bottom: 40px;
     left: 20px;
     right: 20px;
     max-height: 40%;
-    background-color: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(0, 0, 0, 0.8);
-    padding: 20px;
-    border-radius: 10px;
-    overflow: auto;
-    z-index: 1;
-    color: white;
-}
-
-#cover-container {
-    position: absolute;
-    top: 20px;
-    bottom: 20px;
-    left: 20px;
-    right: 20px;
     background-color: rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -72,11 +55,37 @@ body {
     color: white;
 }
 
+#cover-container {
+    position: absolute;
+    top: 20px;
+    bottom: 40px;
+    left: 20px;
+    right: 20px;
+    background-color: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 0, 0, 0.8);
+    padding: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+    z-index: 1;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 #cover-container p {
   margin: 0;
 }
 
 #cover-container img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+#cover-container > * {
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
@@ -123,4 +132,40 @@ header {
 #cover-container li
 {
   font-size: 32px;
+}
+
+blockquote {
+    font-size: 36px;               /* Make text bigger */
+    font-style: italic;            /* Optional: traditional blockquote style */
+    color: white;                  /* Match your overlay text color */
+    border-left: 5px solid #ffffff; /* White vertical line on the left */
+    padding-left: 20px;            /* Space between line and text */
+    padding-top: 20px;
+    padding-bottom: 20px;
+    margin: 20px 20px;                /* Vertical spacing around blockquote */
+}
+
+/* Improve list readability */
+#content-overlay ul,
+#cover-container ul,
+section ul {
+    font-size: 18px;            /* Keep consistent with other text */
+    line-height: 1.4;           /* More space between lines */
+    margin-left: 0;              /* Optional: remove extra default margin */
+    padding-left: 40px;          /* Space for custom bullets */
+    list-style: none;            /* Remove default bullets */
+}
+
+/* Custom bullet markers */
+#content-overlay ul li::marker,
+#cover-container ul li::marker,
+section ul li::marker {
+    content: "— ";                /* Unicode bullet, can replace with emojis like "👉" */
+}
+
+/* Extra spacing between items */
+#content-overlay ul li,
+#cover-container ul li,
+section ul li {
+    margin-bottom: 20px;         /* Space between list items */
 }

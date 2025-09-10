@@ -35,21 +35,16 @@ map.getCanvas().addEventListener('keydown', (event) => {
 let slides
 let currentSlide = 0
 
-fetch('presentation.md')
-    .then(response => response.text())
-    .then(text => {
-        slides = text.split('---')
-        renderSlide(currentSlide)
-    })
 
 map.on('style.load', () => {
-  map.setFog({
-    color: 'rgb(186, 210, 235)', // Lower atmosphere
-    'high-color': 'rgb(36, 92, 223)', // Upper atmosphere
-    'horizon-blend': 0.02, // Atmosphere thickness (default 0.2 at low zooms)
-    'space-color': 'rgb(11, 11, 25)', // Background color
-    'star-intensity': 0.6 // Background star brightness (default 0.35 at low zoooms )
-  })
+    map.setFog({
+        color: 'rgb(186, 210, 235)', // Lower atmosphere
+        'high-color': 'rgb(36, 92, 223)', // Upper atmosphere
+        'horizon-blend': 0.02, // Atmosphere thickness (default 0.2 at low zooms)
+        'space-color': 'rgb(11, 11, 25)', // Background color
+        'star-intensity': 0.6 // Background star brightness (default 0.35 at low zoooms )
+    })
+
 })
 
 map.on('load', () => {
@@ -70,6 +65,13 @@ map.on('load', () => {
         'country-label'
     )
     removeHighlight()
+
+    fetch('presentation.md')
+    .then(response => response.text())
+    .then(text => {
+        slides = text.split('---')
+        renderSlide(currentSlide)
+    })
 })
 
 function renderSlide(slideIndex) {
@@ -102,6 +104,8 @@ function renderSlide(slideIndex) {
         }
 
         if (mapAttributes.center && mapAttributes.zoom) {
+            console.log(mapAttributes)
+            console.log(mapAttributes.center)
             map.flyTo({
                 center: mapAttributes.center,
                 zoom: mapAttributes.zoom,
@@ -152,8 +156,9 @@ function renderSlide(slideIndex) {
 }
 
 function parseImage(tempDiv) {
-    let imageParagraph = null;
-    let imageWidth = '33%';
+    let imageParagraph = null
+    let imageWidth
+    let alignment
     const images = Array.from(tempDiv.querySelectorAll('img'))
 
     for (const img of images) {
@@ -169,33 +174,78 @@ function parseImage(tempDiv) {
                 break;
             }
         }
+        else {
+            const match = alt.match(/width:(\d+)%/);
+            if (match) {
+                const p = img.parentElement;
+                if (p.tagName === 'P') {
+                    imageParagraph = p;
+                    alignment = 'left'
+                    if (match[1]) {
+                        imageWidth = `${match[1]}%`
+                    }
+                }
+            }
+            
+            const matchCenter = alt.match(/center/);
+            if (matchCenter) {
+                const p = img.parentElement;
+                if (p.tagName === 'P') {
+                    imageParagraph = p;
+                    alignment = 'center'
+                }
+            }
+        }
     }
     let content
     if (imageParagraph) {
-        const flexContainer = document.createElement('div')
-        flexContainer.style.display = 'flex'
-        flexContainer.style.alignItems = 'flex-start'
-
-        const mainContent = document.createElement('div')
-        mainContent.style.flex = '1'
-
-        const otherNodes = Array.from(tempDiv.childNodes).filter(node => node !== imageParagraph)
-        otherNodes.forEach(node => mainContent.appendChild(node))
-
-        flexContainer.appendChild(mainContent)
-        flexContainer.appendChild(imageParagraph)
-
-        imageParagraph.style.width = imageWidth
-        imageParagraph.style.marginLeft = '20px'
-        imageParagraph.style.flexShrink = '0'
-
-        const img = imageParagraph.querySelector('img')
-        if (img) {
-            img.style.width = '100%'
-            img.style.height = 'auto'
+        if (alignment) {
+            imageParagraph.style.textAlign = alignment
+            console.log(alignment)
+            if (imageWidth) {
+                const img = imageParagraph.querySelector('img')
+                if (img) {
+                    img.style.width = imageWidth
+                }
+            }
+            content = tempDiv.innerHTML
         }
+        else {
+            const flexContainer = document.createElement('div')
+            flexContainer.style.display = 'flex'
+            flexContainer.style.alignItems = 'flex-start'
+            flexContainer.style.height = '100%'
+            flexContainer.style.boxSizing = 'border-box'
 
-        content = flexContainer.outerHTML
+            const mainContent = document.createElement('div')
+            mainContent.style.flex = '1'
+
+            const otherNodes = Array.from(tempDiv.childNodes).filter(node => node !== imageParagraph)
+            otherNodes.forEach(node => mainContent.appendChild(node))
+
+            flexContainer.appendChild(mainContent)
+            flexContainer.appendChild(imageParagraph)
+
+            imageParagraph.style.width = imageWidth
+            imageParagraph.style.marginLeft = '20px'
+            imageParagraph.style.marginRight = '40px'
+            imageParagraph.style.marginBottom = '0px'
+            imageParagraph.style.height = '100%'
+
+            imageParagraph.style.display = 'flex';
+            imageParagraph.style.flexDirection = 'column';
+            imageParagraph.style.justifyContent = 'center'; // vertical center
+
+            imageParagraph.style.flexShrink = '0'
+
+            const img = imageParagraph.querySelector('img')
+            if (img) {
+                img.style.width = '100%'
+                img.style.height = 'auto'
+            }
+
+            content = flexContainer.outerHTML
+        }
     } else {
         content = tempDiv.innerHTML
     }
