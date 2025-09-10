@@ -56,13 +56,13 @@ Michael Gerasymenko, Delivery Hero
 # Rider App
 
 * **Source of income** for hundred thousands of riders
-* Must be extermely reliable, as any quality issue is keeping riders from delivering food and is imapcting the company directly
+* Must be extremely reliable, as any quality issue is keeping riders from delivering food and is impacting the company directly
 
 ![bg right:24%](images/rider-app1.png)
 
 ---
 
-# What is a performance?
+# What is performance?
 
 * Different people would see it differently
 * In general, **you would know that performance is bad when you see it**
@@ -98,14 +98,15 @@ The Rider app is used in extreme conditions:
 * Frequently riders are using **old devices**
 * The app is running for **8-10 hours** during the work shift
 * Riders are working outside, devices are frequently experiencing **extreme heat**
+* Computationally intensive map rendering, always-on display on high brightness and continous network usage contribute to the **battery drain**
 * Device has to be **charged** during the shift, which is adding up to the heat
 
 ---
 
 # How big is the usage of Mapbox?
 
-* It's almost **always visible** on the screen
-* We are using Mapbox **Navigation** SDK as well
+* It's the map UI almost **always visible** on the screen
+* In many countries we are using Mapbox **Navigation** SDK on top of it
 
 ![bg right:24%](images/rider-app2.png)
 

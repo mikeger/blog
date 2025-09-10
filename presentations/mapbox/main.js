@@ -104,20 +104,22 @@ function renderSlide(slideIndex) {
         }
 
         if (mapAttributes.center && mapAttributes.zoom) {
-            console.log(mapAttributes)
-            console.log(mapAttributes.center)
+            stopGlobeRotation()    
             map.flyTo({
                 center: mapAttributes.center,
                 zoom: mapAttributes.zoom,
                 essential: true
-            });
+            })    
         }
 
         if (mapAttributes.highlight) {
             highlightCountry(mapAttributes.highlight);
 
             if (mapAttributes.highlight.length > 3) {
-                startGlobeRotation();
+                startGlobeRotation()
+            }
+            else {
+                stopGlobeRotation()    
             }
         } else {
             removeHighlight();
@@ -140,7 +142,7 @@ function renderSlide(slideIndex) {
     } else {
         // CONTENT SLIDE
         removeHighlight()
-        stopGlobeRotation()
+        // stopGlobeRotation()
 
         titleOverlay.style.display = 'none'
         contentOverlay.style.display = 'none'
@@ -201,7 +203,6 @@ function parseImage(tempDiv) {
     if (imageParagraph) {
         if (alignment) {
             imageParagraph.style.textAlign = alignment
-            console.log(alignment)
             if (imageWidth) {
                 const img = imageParagraph.querySelector('img')
                 if (img) {

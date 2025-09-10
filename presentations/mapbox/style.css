@@ -160,12 +160,11 @@ section ul {
 #content-overlay ul li::marker,
 #cover-container ul li::marker,
 section ul li::marker {
-    content: "— ";                /* Unicode bullet, can replace with emojis like "👉" */
+    content: "— ";                
 }
 
-/* Extra spacing between items */
 #content-overlay ul li,
 #cover-container ul li,
 section ul li {
-    margin-bottom: 20px;         /* Space between list items */
+    margin-bottom: 20px;
 }
