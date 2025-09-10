@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "deploy": "next build && next export && touch out/.nojekyll && touch out/CNAME && echo \"gera.cx\" > out/CNAME && gh-pages -d out -t true",
+    "deploy": "next build && next export && touch out/.nojekyll && touch out/CNAME && echo \"gera.cx\" > out/CNAME && cp -r presentations/mapbox out && gh-pages -d out -t true",
     "start": "next start",
     "type-check": "tsc --pretty --noEmit",
     "format": "prettier --write .",
