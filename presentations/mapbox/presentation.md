@@ -18,6 +18,8 @@ Michael Gerasymenko, Delivery Hero
 
 ### Bitrise Build 2025
 
+## Permanent link: https://gera.cx/mapbox/
+
 ---
 
 <!-- map: center=[31.1656, 48.3794] zoom=5 highlight=UKR -->
