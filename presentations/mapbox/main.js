@@ -1,5 +1,23 @@
 mapboxgl.accessToken = 'pk.eyJ1IjoibWlrZWdlciIsImEiOiJjbDJvdGx6cDMxNWt3M2NydTBtczRhczB2In0.pYWcJcW6SyHEQIB68FghAg'
 
+const contentSlideOverlay = document.createElement('div');
+contentSlideOverlay.id = 'content-slide-overlay';
+contentSlideOverlay.style.cssText = `
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: white;
+    color: black;
+    z-index: 2;
+    display: none;
+    overflow-y: auto;
+    padding: 40px 5%;
+    box-sizing: border-box;
+`;
+document.body.appendChild(contentSlideOverlay);
+
 const map = new mapboxgl.Map({
     container: 'map',
     projection: 'globe',
@@ -15,13 +33,13 @@ map.getCanvas().addEventListener('keydown', (event) => {
 }, true)
 
 let slides
-let currentSlide = -1
+let currentSlide = 0
 
 fetch('presentation.md')
     .then(response => response.text())
     .then(text => {
-        slides = text.split('---\n');
-        renderSlide(currentSlide);
+        slides = text.split('---')
+        renderSlide(currentSlide)
     })
 
 map.on('style.load', () => {
@@ -55,27 +73,30 @@ map.on('load', () => {
 })
 
 function renderSlide(slideIndex) {
-    if (slideIndex == -1) {
-        document.getElementById('cover-container').style.display = 'flex'
-    }
-    else {
-        document.getElementById('cover-container').style.display = 'none'
-        const slideContent = slides[slideIndex];
-        const mapAttributeMatch = slideContent.match(/<!-- map: (.*) -->/)
+    const titleOverlay = document.getElementById('title-overlay');
+    const contentOverlay = document.getElementById('content-overlay');
+    const coverContainer = document.getElementById('cover-container');
+
+    const slideContent = slides[slideIndex];
+    const mapAttributeMatch = slideContent.match(/<!-- map: (.*) -->/);
+
+    if (mapAttributeMatch) {
+        // MAP SLIDE
+        titleOverlay.style.display = 'block';
+        contentOverlay.style.display = 'block';
+        coverContainer.style.display = 'none';
 
         const mapAttributes = {};
-        if (mapAttributeMatch) {
-            const attributeRegex = /(\w+)=((?:\[.*?\])|(?:\S+))/g
-            let match
-            while ((match = attributeRegex.exec(mapAttributeMatch[1])) !== null) {
-                const key = match[1]
-                const value = match[2]
-                if (value) {
-                    try {
-                        mapAttributes[key] = JSON.parse(value)
-                    } catch (e) {
-                        mapAttributes[key] = value
-                    }
+        const attributeRegex = /(\w+)=((?:\[.*?\])|(?:\S+))/g;
+        let match;
+        while ((match = attributeRegex.exec(mapAttributeMatch[1])) !== null) {
+            const key = match[1];
+            const value = match[2];
+            if (value) {
+                try {
+                    mapAttributes[key] = JSON.parse(value);
+                } catch (e) {
+                    mapAttributes[key] = value;
                 }
             }
         }
@@ -85,17 +106,17 @@ function renderSlide(slideIndex) {
                 center: mapAttributes.center,
                 zoom: mapAttributes.zoom,
                 essential: true
-            })
+            });
         }
 
         if (mapAttributes.highlight) {
-            highlightCountry(mapAttributes.highlight)
+            highlightCountry(mapAttributes.highlight);
 
             if (mapAttributes.highlight.length > 3) {
-                startGlobeRotation()
+                startGlobeRotation();
             }
         } else {
-            removeHighlight()
+            removeHighlight();
             stopGlobeRotation()
         }
 
@@ -108,16 +129,82 @@ function renderSlide(slideIndex) {
         if (titleElement) {
             titleElement.remove()
         }
-        const content = tempDiv.innerHTML
 
-        document.getElementById('title-overlay').innerHTML = title
-        document.getElementById('content-overlay').innerHTML = content
+        titleOverlay.innerHTML = title
+        contentOverlay.innerHTML = parseImage(tempDiv)
+
+    } else {
+        // CONTENT SLIDE
+        removeHighlight()
+        stopGlobeRotation()
+
+        titleOverlay.style.display = 'none'
+        contentOverlay.style.display = 'none'
+        coverContainer.style.display = 'block'
+
+        const html = marked.parse(slideContent)
+
+        const tempDiv = document.createElement('div')
+        tempDiv.innerHTML = html
+
+        coverContainer.innerHTML = parseImage(tempDiv)
     }
+}
+
+function parseImage(tempDiv) {
+    let imageParagraph = null;
+    let imageWidth = '33%';
+    const images = Array.from(tempDiv.querySelectorAll('img'))
+
+    for (const img of images) {
+        const alt = img.getAttribute('alt') || '';
+        const match = alt.match(/bg right:(\d+)%/);
+        if (match) {
+            const p = img.parentElement;
+            if (p.tagName === 'P') {
+                imageParagraph = p;
+                if (match[1]) {
+                    imageWidth = `${match[1]}%`
+                }
+                break;
+            }
+        }
+    }
+    let content
+    if (imageParagraph) {
+        const flexContainer = document.createElement('div')
+        flexContainer.style.display = 'flex'
+        flexContainer.style.alignItems = 'flex-start'
+
+        const mainContent = document.createElement('div')
+        mainContent.style.flex = '1'
+
+        const otherNodes = Array.from(tempDiv.childNodes).filter(node => node !== imageParagraph)
+        otherNodes.forEach(node => mainContent.appendChild(node))
+
+        flexContainer.appendChild(mainContent)
+        flexContainer.appendChild(imageParagraph)
+
+        imageParagraph.style.width = imageWidth
+        imageParagraph.style.marginLeft = '20px'
+        imageParagraph.style.flexShrink = '0'
+
+        const img = imageParagraph.querySelector('img')
+        if (img) {
+            img.style.width = '100%'
+            img.style.height = 'auto'
+        }
+
+        content = flexContainer.outerHTML
+    } else {
+        content = tempDiv.innerHTML
+    }
+
+    return content
 }
 
 function highlightCountry(countryCodes) {
     const codes = countryCodes.split(',')
-    console.log("Filter: ".concat(codes.toString()))
     map.setFilter('country-boundaries', ['in', 'iso_3166_1_alpha_3', ...codes])
 }
 
@@ -150,8 +237,8 @@ function startGlobeRotation() {
 
 function stopGlobeRotation() {
     if (rotationInterval) {
-        clearInterval(rotationInterval);
-        rotationInterval = null;
+        clearInterval(rotationInterval)
+        rotationInterval = null
     }
 }
 
@@ -160,7 +247,7 @@ document.addEventListener('keydown', (event) => {
         currentSlide++
         renderSlide(currentSlide)
     }
-    if (event.key === 'ArrowLeft' && currentSlide > -1) {
+    if (event.key === 'ArrowLeft' && currentSlide > 0) {
         currentSlide--
         renderSlide(currentSlide)
     }
