@@ -292,10 +292,16 @@ function stopGlobeRotation() {
     }
 }
 
-document.addEventListener('keydown', (event) => {
-    if (event.key === 'ArrowRight' && currentSlide < slides.length - 1) {
+function nextSlide() {
+    if (currentSlide < slides.length - 1) {
         currentSlide++
         renderSlide(currentSlide)
+    }
+}
+
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowRight' || event.key === ' ' || event.code === 'Space') {
+        nextSlide()
     }
     if (event.key === 'ArrowLeft' && currentSlide > 0) {
         currentSlide--
