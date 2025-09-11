@@ -2,9 +2,17 @@
 
 ---
 
-# Why not use Mapbox for presenting about Mapbox?
+![width:40%](images/build-with-mapbox.png)
 
-![center](images/bilbo.jpg)
+# BUILD WITH mapbox
+
+## BUILD WITH mapbox
+
+### BUILD WITH mapbox
+
+#### BUILD WITH mapbox
+
+> I am going to literally build this presentation with mapbox!
 
 ---
 
@@ -12,13 +20,11 @@
 
 # Escaping the performance Bermuda Triangle
 
-## Optimizing integrations with the Mapbox Navigation SDK
+#### Optimizing integrations with the Mapbox Navigation SDK, Michael Gerasymenko, Delivery Hero
 
-Michael Gerasymenko, Delivery Hero
+### BUILD 2025 | Permanent link: https://gera.cx/mapbox/
 
-### Bitrise Build 2025
-
-## Permanent link: https://gera.cx/mapbox/
+![bg right:15%](images/mike_hat.jpg)
 
 ---
 
@@ -30,8 +36,6 @@ Michael Gerasymenko, Delivery Hero
 * iOS Developer since 2009
 * MSc Applied Mathematics
 * I have experience working on **SDKs** myself developing Onfido iOS SDK
-
-![bg right:15%](images/mike_hat.jpg)
 
 ---
 
@@ -55,7 +59,7 @@ Michael Gerasymenko, Delivery Hero
 
 # Rider App
 
-* **Source of income** for hundred thousands of riders
+* **Source of income** for hundreds of thousands of riders
 * Must be extremely reliable, as any quality issue is keeping riders from delivering food and is impacting the company directly
 
 ![bg right:24%](images/rider-app1.png)
@@ -67,6 +71,8 @@ Michael Gerasymenko, Delivery Hero
 * Different people would see it differently
 * In general, **you would know that performance is bad when you see it**
 * How to formally define it?
+
+![width:30%](images/roadrunner.png)
 
 ---
 
@@ -81,7 +87,7 @@ Michael Gerasymenko, Delivery Hero
 
 # How App Performance is reflected in AQS
 
-* App start to interactive (10 points)
+* App start time to interactive (10 points)
 * All screens time to interactive (10 points)
 * Frozen frames (13 points)
 * Slow rendering (5 points)
@@ -98,7 +104,7 @@ The Rider app is used in extreme conditions:
 * Frequently riders are using **old devices**
 * The app is running for **8-10 hours** during the work shift
 * Riders are working outside, devices are frequently experiencing **extreme heat**
-* Computationally intensive map rendering, always-on display on high brightness and continous network usage contribute to the **battery drain**
+* Computationally intensive map rendering, always-on display on high brightness and continuous network usage contribute to the **battery drain**
 * Device has to be **charged** during the shift, which is adding up to the heat
 
 ---
@@ -114,7 +120,7 @@ The Rider app is used in extreme conditions:
 
 # How big is the impact of Mapbox on the AQS?
 
-* App start to interactive — SDK initialization
+* App start time to interactive — SDK initialization
 * Frozen frames, Slow rendering, App Hangs rate — SDK performance
 * Crash-free users — SDK crashes
 * App size — SDK size
@@ -123,7 +129,7 @@ The Rider app is used in extreme conditions:
 
 # Bermuda Triangle
 
-Hangs are happening in the app, the **leadership is not happy**, but we cannot do anything as the code is foreign for us.
+Hangs are happening in the app, the **leadership is dissatisfied**, but we cannot do anything as the code is foreign for us.
 
 ![width:50% center](images/triangle.png)
 
@@ -166,7 +172,7 @@ Hangs are happening in the app, the **leadership is not happy**, but we cannot d
 * **Telemetry** for performance
 * Be careful with **new SDK releases**
   * Use Beta releases, analyze the telemetry
-* If Mapbox cannot fix it, may be **you** can?
+* If Mapbox cannot fix it, maybe **you** can?
   * Profile the SDK and share learnings with Mapbox
 
 ---
@@ -183,7 +189,7 @@ As we implemented turn by turn navigation in the Rider App, there was obviously 
 
 # Indefinite hang: AQS
 
-Coincidentally, at the same time, we've introduced the Hang Rate to the AQS score... And our app was the worst in the whole Delivery Hero 😳
+Coincidentally, at the same time, we introduced the Hang Rate to the AQS score... And our app was the worst in the whole Delivery Hero 😳
 
 ---
 
@@ -201,9 +207,9 @@ However, on the developer machines, all is working perfectly well.
 
 * Telemetry
   * Using Sentry, we analyzed the logs of the hanging code
-  * Strack traces highlighted issues with general UI performance
+  * Stack traces highlighted issues with general UI performance
 * Sharing issue with Mapbox
-* Real-life testing (dogfooding)
+* Real-life testing (delivering the food)
   * We can see that in real-life testing the app is getting slow, but it's not possible to debug while delivering food
 * Let's review the integration code!
 
@@ -213,11 +219,11 @@ However, on the developer machines, all is working perfectly well.
 
 Using debugger and code review, we found the source of the issue, and it was not Mapbox (at least to a certain extent)
 
-* iOS Navigation UI is styled with a iOS7-times technology called `UIAppearance`
+* iOS Navigation UI is styled with an iOS7-era technology called `UIAppearance`
 * Something similar to CSS, where we are telling UIKit how to style elements
 * We would like to change this style
 * When the navigation header is re-created, we apply styles from Mapbox and our own styles
-* Mapbox is propagating header udpates every 1s
+* Mapbox is propagating header updates every 1s
 
 → This is not ideal to re-create the view every 1s, but this would not bring the app to a choke
 
@@ -229,7 +235,7 @@ I've had experience with UIAppearance, therefore, I knew it could be dangerous:
 
 * `UIAppearance` is never clearing obsolete styles
 * Hence, the more we are setting styles, the more of the styles are accumulated in the process memory
-* However, the memory footpring is not a concern here
+* However, the memory footprint is not a concern here
 * When ANY new view is created, `UIKit` must check if any styles are applying for it
 * Has to go through all registered styles
 * If we are registering a bunch of styles every 1s, over time creating ANY new view would take more than 500ms
