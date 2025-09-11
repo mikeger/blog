@@ -47,6 +47,38 @@ map.on('style.load', () => {
 
 })
 
+function animateElement(element, isIn, displayType = 'block') {
+    const duration = 300; // ms
+    return new Promise(resolve => {
+        if (isIn) {
+            element.style.display = displayType;
+            element.style.opacity = 0;
+            element.style.transform = 'scale(1.1)';
+            element.style.transition = `transform ${duration}ms ease-out, opacity ${duration}ms ease-out`;
+            setTimeout(() => {
+                element.style.opacity = 1;
+                element.style.transform = 'scale(1)';
+            }, 20);
+        } else {
+            element.style.opacity = 1;
+            element.style.transform = 'scale(1)';
+            element.style.transition = `transform ${duration}ms ease-in, opacity ${duration}ms ease-in`;
+            setTimeout(() => {
+                element.style.opacity = 0;
+                element.style.transform = 'scale(0.9)';
+            }, 20);
+        }
+
+        setTimeout(() => {
+            if (!isIn) {
+                element.style.display = 'none';
+            }
+            element.style.transition = '';
+            resolve();
+        }, duration + 20);
+    });
+}
+
 map.on('load', () => {
     map.addLayer(
         {
@@ -68,26 +100,29 @@ map.on('load', () => {
 
     fetch('presentation.md')
     .then(response => response.text())
-    .then(text => {
+    .then(async (text) => {
         slides = text.split('---')
-        renderSlide(currentSlide)
+        await renderSlide(currentSlide)
     })
 })
 
-function renderSlide(slideIndex) {
+async function renderSlide(slideIndex) {
     const titleOverlay = document.getElementById('title-overlay');
     const contentOverlay = document.getElementById('content-overlay');
     const coverContainer = document.getElementById('cover-container');
+
+    const animationsOut = [];
+    if (titleOverlay.style.display !== 'none') animationsOut.push(animateElement(titleOverlay, false));
+    if (contentOverlay.style.display !== 'none') animationsOut.push(animateElement(contentOverlay, false));
+    if (coverContainer.style.display !== 'none') animationsOut.push(animateElement(coverContainer, false));
+    
+    await Promise.all(animationsOut);
 
     const slideContent = slides[slideIndex];
     const mapAttributeMatch = slideContent.match(/<!-- map: (.*) -->/);
 
     if (mapAttributeMatch) {
         // MAP SLIDE
-        titleOverlay.style.display = 'block';
-        contentOverlay.style.display = 'block';
-        coverContainer.style.display = 'none';
-
         const mapAttributes = {};
         const attributeRegex = /(\w+)=((?:\[.*?\])|(?:\S+))/g;
         let match;
@@ -139,14 +174,13 @@ function renderSlide(slideIndex) {
         titleOverlay.innerHTML = title
         contentOverlay.innerHTML = parseImage(tempDiv)
 
+        animateElement(titleOverlay, true);
+        animateElement(contentOverlay, true);
+
     } else {
         // CONTENT SLIDE
         removeHighlight()
         // stopGlobeRotation()
-
-        titleOverlay.style.display = 'none'
-        contentOverlay.style.display = 'none'
-        coverContainer.style.display = 'block'
 
         const html = marked.parse(slideContent)
 
@@ -154,6 +188,7 @@ function renderSlide(slideIndex) {
         tempDiv.innerHTML = html
 
         coverContainer.innerHTML = parseImage(tempDiv)
+        animateElement(coverContainer, true, 'block');
     }
 }
 
@@ -293,19 +328,20 @@ function stopGlobeRotation() {
     }
 }
 
-function nextSlide() {
+async function nextSlide() {
     if (currentSlide < slides.length - 1) {
         currentSlide++
-        renderSlide(currentSlide)
+        await renderSlide(currentSlide)
     }
 }
 
-document.addEventListener('keydown', (event) => {
+document.addEventListener('keydown', async (event) => {
     if (event.key === 'ArrowRight' || event.key === ' ' || event.code === 'Space') {
-        nextSlide()
+        await nextSlide()
     }
     if (event.key === 'ArrowLeft' && currentSlide > 0) {
         currentSlide--
-        renderSlide(currentSlide)
+        await renderSlide(currentSlide)
     }
 })
+
