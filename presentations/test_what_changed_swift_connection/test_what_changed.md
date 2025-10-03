@@ -1,7 +1,7 @@
 ---
 marp: true
-header: 'Michael Gerasymenko ![height:40](images/logo_small.png)'
-footer: 'Swift Connection 2025'
+header: 'Michael "Mike" Gerasymenko ![height:40](images/logo_small.png)'
+footer: 'Swift Connection 2025 — Donate to [🇺🇦 monstrov.org](https://monstrov.org)'
 paginate: true
 transition: coverflow
 ---
@@ -42,20 +42,15 @@ header {
 
 #### Michael Gerasymenko
 
-Comments
+<!-- Comments
 - Time is limited
 - Introduction can be shorter (could be cut for time)
 - Mention swift testing / XCTest compatibility
-- 10 min session, 5 min Q/A
+- 10 min session, 5 min Q/A -->
 
 <!-- ![width:250](images/logo_dh_logistics.png) -->
 
-<br>
-
-Swift Connection 2025
-
 <!-- ![bg right:42%](images/background_anim.gif) -->
-
 
 
 <!-- _paginate: false -->
@@ -64,41 +59,29 @@ Swift Connection 2025
 
 # Who I am
 
-Hey, I'm Michael. I am originally from Ukraine 🇺🇦.
+Hey, I'm Michael. I am originally from Ukraine 🇺🇦, based in Berlin 🇩🇪
 
-I started as an iOS engineer in 2009 at Readdle. Worked at Wire, Cara Care and Feeld.
+Started as an iOS engineer in 2009:
+- Readdle
+- Wire
+- Cara Care
+- Feeld
 
-Twitter: [@gk0io](https://twitter.com/gk0io)
 Github: [mikeger](https://github.com/mikeger)
-Email: mike@gera.cx
 Web: https://gera.cx
 
-![bg right:42%](images/mike-hat.jpg)
-
----
-
-# What is happening?
-
-My hometown local charity fund:
-
-https://monstrov.org
-
-![bg left:33%](images/Ukraine.jpg)
+![bg right:33%](images/mike-hat.jpg)
 
 ---
 
 # Where I work
 
-I am a Staff iOS engineer at Delivery Hero Logistics:
+Today, a Staff iOS engineer at Delivery Hero Logistics:
 
 - Available in 70-something countries
 - Serving over a million delivery drivers monthly
 
-<!-- We are constantly hiring engineers. Reach out if you are interested. Or apply at https://careers.deliveryhero.com -->
-
----
-
-![bg 110%](images/brands.png)
+![bg 100% right:33%](images/brands.png)
 
 <!-- _header: '' -->
 <!-- _footer: '' -->
@@ -106,37 +89,31 @@ I am a Staff iOS engineer at Delivery Hero Logistics:
 
 ---
 
-# Let's imagine you have a mobile application
+# Your mobile application
 
 There are some core jobs it is doing:
 
-- Login and registration
-- Preferences
-- Home Interface
-- Details Interface
+- Login and Registration,
+- Preferences,
+- Home UI,
+- Details UI,
 - ...
 
 ---
 
 # Growth
 
-As your company is growing 🌱, so is your app. Over time, there would be multiple teams working on one application. Letting them **separate responsibilities** and allowing them to **own** their part of the application is crucial.
+As your company grows 🌱, so does your app. Over time, multiple teams would work on a single application. Letting them **separate responsibilities** and allowing them to **own** their part of the application is crucial.
 
 Each team can own a set of modules and some parts of the main application's code.
 
-![bg right:33%](images/flower.jpg)
+![bg right:33%](images/wolfgang-hasselmann-ooSFC3HSp-g-unsplash.jpg)
 
----
-
-# Modular architecture
-
-Modular architecture is a software design approach that prioritizes breaking down a program's functionality into **self-contained modules**. 
-
-Each module encompasses all the required components to execute a specific aspect of the desired functionality.
+<!-- ---
 
  ![bg left:33%](images/nodes.webp)
 
-
+ -->
 ---
 <!--
 # External dependencies
@@ -160,7 +137,7 @@ For example:
 
 You can treat them as internally developed libraries.
 -->
-
+<!-- 
 # Swift Package Manager or Projects/Targets?
 
 SPM and Xcode support local packages, which allows for lightweight modularization:
@@ -174,12 +151,10 @@ Packages/
 ├── Login/
 ...
 ```
-<!-- _header: 'Mike Gerasymenko' -->
 
-![bg height:300 right:33%](images/swift-package-manager.png)
 
----
-
+![bg height:300 right:33%](images/swift-package-manager.png) -->
+<!-- 
 # In Xcode
 
 - First-class citizen treatment: `Designed by Apple in California`
@@ -188,7 +163,7 @@ Packages/
 - External dependencies are also supported
 
 ![bg left:33% height:300](images/xcode-spm.png)
-<!-- _header: '' -->
+
 
 ---
 
@@ -198,45 +173,66 @@ Packages/
 - You can open individual packages in Xcode to speed up the development
 - ... and you can do selective testing 🚀
 
-![bg right:33%](images/dev_center1.jpg)
+
 
 ---
 
 # Congratulations, now you have a modular application
 
 ![bg left:33%](images/legos.jpg)
-
+<!-- 
 ---
 
 > “Insanity is doing the same thing over and over and expecting different results.”
 
-Albert Einstein, probably
+Albert Einstein, probably 
+
 
 ---
+-->
 
 # Modules
 
-Imagine we have the following dependencies structure
+Imagine having the following dependency structure:
 
-![bg right:60% 90%](images/structure.png)
-<!-- _header: 'Mike Gerasymenko' -->
+![bg right:60% 100%](images/deps.png)
+<!-- _header: 'Michael "Mike" Gerasymenko' -->
 
 ---
 
-![center width:230](images/bored.png)
+![center width:420](images/bored.png)
 
 # Running all those tests is taking so much time!
 
 ---
 
-# Change
-
 ![center width:220](images/thinking.png)
 
-If the _📦Login_ module is changed, it would only affect the _📦LoginUI_ and the _📱MainApp_.
+If the _📦Login_ module is changed...
 
-![bg right:60% 90%](images/structure-changed.png)
-<!-- _header: 'Mike Gerasymenko' -->
+![bg right:60% 100%](images/deps-change.png)
+<!-- _header: 'Michael "Mike" Gerasymenko' -->
+
+---
+
+![center width:220](images/thinking-graph.png)
+
+It would only affect the _📦LoginUI_...
+
+![bg right:60% 100%](images/deps-iteration1.png)
+
+<!-- _header: 'Michael "Mike" Gerasymenko' -->
+
+---
+
+![center width:220](images/thinking-graph.png)
+
+And the _📱MainApp_...
+
+![bg right:60% 100%](images/deps-iteration2.png)
+
+<!-- _header: 'Michael "Mike" Gerasymenko' -->
+
 ---
 
 
@@ -244,88 +240,58 @@ If the _📦Login_ module is changed, it would only affect the _📦LoginUI_ and
 
 # Does it make sense to test all the modules, if we know only the _📦Login_ module is changed?
 
-
-<!-- 
----
-
-![bg](images/nope0.gif) ![bg](images/nope1.gif)
-![bg](images/nope2.gif) ![bg](images/nope3.gif)
--->
-<!-- _header: '' -->
-<!-- _footer: '' -->
-<!-- _paginate: false -->
-
 --- 
 
 ![left:33% width:200](images/idea.png)
 
 # We can only run 50% of the tests and get the same results
 
-![bg right:60% 90%](images/structure-changed-disabled.png)
+![bg right:60% 90%](images/deps-test.png)
 
 
 
-<!-- _header: 'Mike Gerasymenko' -->
+<!-- _header: 'Michael "Mike" Gerasymenko' -->
 ---
 
 # But how can we know?
 
 ### 1. Detecting what is changed
 
-Well, Git allows us to find what files were touched in the changeset. 
+Git allows us to find what files were touched in the changeset. 
 
 ```bash
 Root
 ├── Dependencies
 │   └── Login
-│       ├── ❗️LoginAssembly.swift
+│       ├── Package.swift
+│       ├── Sources
+│       │   └── ❗️LoginAssembly.swift
 │       └── ...
 ├── MyProject.xcodeproj
 └── Sources
 ```
 
+![bg right:33% width:300](images/idea.png)
+<!-- _header: 'Michael "Mike" Gerasymenko' -->
 ---
 
-### 2. Build the dependency graph
+### 2. Build the dependency graph, save the list of files for each dependency
 
 Going from the project to its dependencies, to its dependencies, to dependencies of the dependencies, ...
 
-This can be achieved with _XcodeProj_ package from Tuist.
+This can be achieved with the _XcodeProj_ package from Tuist.
 
 Dependencies between packages can be parsed with `swift package dump-package`.
-
-
-<!--
-![Alt text](../../public/images/wwdc22/dev_center1.jpg)
----
-
-![](images/finally.gif)
--->
----
-
-### 2.5. Save the list of files for each dependency
-
-This is important so we'll know which files affect which targets.
-
----
-
-## 3. Traverse the graph
-
-Go from every changed dependency all the way up, and save a set of dependencies you've touched.
-
-![bg right:60% 90%](images/structure.png)
-<!-- _header: 'Mike Gerasymenko' -->
----
-
-## 4. Disable tests that can be skipped in the scheme/test plan
 
 This is the most challenging part. We are dealing with obscure Xcode formats. But if we get that far, we will not be scared by that.
 
 ---
 
-# Overview
+## 3. Traverse the graph, disable tests that can be skipped in the scheme/test plan
 
-![](images/test-sequence.png)
+Go from every changed dependency all the way up, and save a set of dependencies you've touched.
+
+<!-- _header: 'Michael "Mike" Gerasymenko' -->
 
 ---
 
@@ -335,19 +301,7 @@ But I am not going to implement it now.
 
 ---
 
-# Luckily, we implemented it already.
-
-<!-- 
-![bg](images/wow0.gif)
-![bg](images/wow1.gif)
-![bg](images/wow2.gif)
-![bg](images/wow3.gif) -->
-
-<!-- _header: '' -->
-<!-- _footer: '' -->
-<!-- _paginate: false -->
-
----
+# Luckily, I implemented it already
 
 <style>
 img[alt~="center"] {
@@ -366,14 +320,15 @@ img[alt~="center"] {
 
 # Benefits
 
-We observed 40-50% average CI time reduction when using XcodeSelectiveTesting
+We observed a 40-50% average CI time reduction when using XcodeSelectiveTesting.
 
 ![](images/test-changed-stats-build.png)
 
+
+<!-- 
 ---
 
 ![](images/test-changed-stats.png)
-
 ---
 
 # Why testing fast and precise is important?
@@ -382,25 +337,71 @@ We observed 40-50% average CI time reduction when using XcodeSelectiveTesting
 
 - Faster CI run means consuming less natural resources
 - Local test runs are saving developer hours
-<!-- _header: '' -->
+_header: '' -->
 
 ---
 
-# Pitfails (TODO)
+# Support
 
-- Coverage reports
-- Flaky tests
-
----
-
-# Be an open-source maintainer!
+- Xcode Projects, also with buildable folders
+- Swift Testing
+- XCTest + UI Tests
+- SPM packages
 
 ---
 
-# Honorable mentions
+# Pitfalls
 
-- Tuist
+- Code coverage reports must be uploaded per module. Otherwise, every run you would get different (bad) coverage.
+- Flaky tests might be merged and stay in the repo for a while until someone touches them.
 
+---
+
+# Open-source is awesome
+
+- Make friends
+- Let your future employer already benefit from your code
+- Other people fix your bugs
+- Maybe even speak on stage
+
+- I would like to thank all contributors!
+
+![bg 90% right:33%](images/contributors.png)
+
+<!-- _header: 'Michael "Mike" Gerasymenko' -->
+
+---
+
+# What about other solutions?
+
+- **Tuist** also supports selective testing
+
+- Has a different principle: Target contents are hashed, and after the test is successful, it's saved on the Tuist.dev cloud
+
+- Downsides: it is paid
+
+- Upsides: fewer test runs for feature branches
+
+---
+
+![70%](images/tuist-effect.png)
+
+---
+
+# Thank you!
+
+# Questions?
+
+AI used for proofreading
+
+Illustrations by Alexander Gerasymenko
+
+Sunflower by Wolfgang Hasselmann
+
+![bg width:500 right:33%](images/mike-hat-tower.png)
+
+<!-- _header: 'Michael "Mike" Gerasymenko' -->
+<!-- 
 ---
 
 TODO: 
@@ -428,13 +429,4 @@ Also, can be cut for time
 
 
 ![](images/scale5.png)
-
----
-
-# What's next?
-
---- 
-
-# Questions
-
-Slides: []()
+ -->
