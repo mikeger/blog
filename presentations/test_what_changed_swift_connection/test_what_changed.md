@@ -38,9 +38,11 @@ header {
 
 </style>
 
-# Streamlining iOS Development with Selective Testing
+# Streamlining iOS<sup>*</sup> Development with Selective Testing
 
-#### Michael Gerasymenko
+#### Michael 'Mike' Gerasymenko
+
+<sup>*</sup>Actually, any Swift code
 
 <!-- Comments
 - Time is limited
@@ -55,6 +57,32 @@ header {
 
 <!-- _paginate: false -->
 
+
+---
+
+![bg](images/arts-technology.webp)
+
+---
+
+# Hey Mike...
+
+---
+
+# We are interested in your talk!
+
+---
+
+# Just...
+
+---
+
+# Can it be a lightning talk?
+
+---
+
+![bg](images/lightning.png)
+
+<!-- 
 ---
 
 # Who I am
@@ -81,11 +109,20 @@ Today, a Staff iOS engineer at Delivery Hero Logistics:
 - Available in 70-something countries
 - Serving over a million delivery drivers monthly
 
-![bg 100% right:33%](images/brands.png)
+![bg 100% right:33%](images/brands.png) -->
 
 <!-- _header: '' -->
 <!-- _footer: '' -->
 <!-- _paginate: false -->
+
+---
+
+# How many of you are writing tests? No blaming!
+
+
+---
+
+# Happy with how long it takes to run them?
 
 ---
 
@@ -193,8 +230,6 @@ Albert Einstein, probably
 
 # Modules
 
-Imagine having the following dependency structure:
-
 ![bg right:60% 100%](images/deps.png)
 <!-- _header: 'Michael "Mike" Gerasymenko' -->
 
@@ -301,7 +336,7 @@ But I am not going to implement it now.
 
 ---
 
-# Luckily, I implemented it already
+# Available Today!
 
 <style>
 img[alt~="center"] {
@@ -313,14 +348,14 @@ img[alt~="center"] {
 <!-- ![width:800 center](images/github.png) -->
 ![](images/repo-preview.png)
 
-[github.com/mikeger/XcodeSelectiveTesting](https://github.com/mikeger/XcodeSelectiveTesting)
+# [github.com/mikeger/XcodeSelectiveTesting](https://github.com/mikeger/XcodeSelectiveTesting)
 
 
 ---
 
-# Benefits
-
-We observed a 40-50% average CI time reduction when using XcodeSelectiveTesting.
+# What does it bring?
+<!-- 
+We observed a 40-50% average CI time reduction when using XcodeSelectiveTesting. -->
 
 ![](images/test-changed-stats-build.png)
 
@@ -350,6 +385,18 @@ _header: '' -->
 
 ---
 
+# Support
+
+- Xcode Projects, also with buildable folders
+- Swift Testing
+- XCTest + UI Tests
+- SPM packages
+- Even Linux! Ask Marcin ![width:100](images/marcin.png)
+
+
+
+---
+
 # Pitfalls
 
 - Code coverage reports must be uploaded per module. Otherwise, every run you would get different (bad) coverage.
@@ -359,12 +406,23 @@ _header: '' -->
 
 # Open-source is awesome
 
-- Make friends
-- Let your future employer already benefit from your code
-- Other people fix your bugs
-- Maybe even speak on stage
+- Make friends.
+- Let your future employer already benefit from your code.
+- Other people fix your bugs.
 
-- I would like to thank all contributors!
+![bg 90% right:33%](images/contributors.png)
+
+<!-- _header: 'Michael "Mike" Gerasymenko' -->
+---
+
+# Open-source is awesome
+
+- Make friends.
+- Let your future employer already benefit from your code.
+- Other people fix your bugs.
+- Maybe even speak on stage!
+
+- **I would like to thank all contributors!**
 
 ![bg 90% right:33%](images/contributors.png)
 
@@ -374,13 +432,17 @@ _header: '' -->
 
 # What about other solutions?
 
-- **Tuist** also supports selective testing
+- **Tuist** also supports selective testing.
 
-- Has a different principle: Target contents are hashed, and after the test is successful, it's saved on the Tuist.dev cloud
+- Has a different principle: Target contents are hashed, and after the test is successful, it's saved on the Tuist.dev cloud.
 
-- Downsides: it is paid
+- Downsides: it is paid.
 
-- Upsides: fewer test runs for feature branches
+- Upsides: fewer test runs for feature branches.
+
+<!-- _header: 'Michael "Mike" Gerasymenko' -->
+
+![bg width:250 right:33%](images/tuist.png)
 
 ---
 
@@ -388,15 +450,34 @@ _header: '' -->
 
 ---
 
+# Fin<i>!</i>
+
+---
+
+# Or not?
+
+---
+
+# Modularization allows Selective Testing. 
+# What else?
+
+---
+
+# Modularization
+
+- Clear ownership
+- Foster API design
+- AI has a way to reason about your code's context — it's module
+
+---
+
 # Thank you!
 
-# Questions?
-
-AI used for proofreading
+<!-- AI used for proofreading -->
 
 Illustrations by Alexander Gerasymenko
-
-Sunflower by Wolfgang Hasselmann
+<!-- 
+Sunflower by Wolfgang Hasselmann, Gleb Paniotov -->
 
 ![bg width:500 right:33%](images/mike-hat-tower.png)
 

@@ -1,5 +1,6 @@
 import { useTheme } from 'next-themes';
 import React from 'react';
+/* eslint-disable react/no-unknown-property */
 
 /**
  * Based off of gatsby-theme-novela
