@@ -1,0 +1,15 @@
+flowchart LR
+    subgraph Cloud
+        BE[(Home API + Event Bridge)]
+        Gateway[Realtime Gateway]
+    end
+    subgraph App
+        CM[ConnectionManagerImpl]
+        RHS[RiderHomeDataService]
+        UI[Rider App UI]
+    end
+    BE -->|state change| Gateway
+    Gateway -->|WebSocket| CM
+    CM -->|Async stream| UI
+    CM -->|Refresh trigger| RHS
+    RHS -->|State diff| UI

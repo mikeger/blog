@@ -1,0 +1,9 @@
+stateDiagram-v2
+    [*] --> Idle
+    Idle --> Connecting : token ready
+    Connecting --> Connected : handshake ok
+    Connected --> Disconnected : drop/error
+    Disconnected --> Reconnecting : backoff attempt
+    Reconnecting --> Connected : success
+    Reconnecting --> Polling : max attempts / unreachable
+    Polling --> Connecting : reachability + token

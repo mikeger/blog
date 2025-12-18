@@ -1,0 +1,6 @@
+flowchart LR
+    Backend[(Rider Services)] -- state delta --> Notifs[Push notifications]
+    Backend -- periodic snapshot --> Polling[Smart polling]
+    Notifs -.->|best effort| App
+    Polling -->|60s interval| App
+    App -. stale gap .-> Rider
