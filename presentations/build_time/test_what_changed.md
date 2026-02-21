@@ -7,7 +7,7 @@ transition: coverflow
 ---
 
 <style>
-@font-face {
+/* @font-face {
     font-family: "Outfit";
     src: url("theme/fonts/Outfit-Regular.ttf");
 }
@@ -15,10 +15,10 @@ transition: coverflow
     font-family: "Outfit";
     src: url("theme/fonts/Outfit-Bold.ttf");
     font-weight: bold;
-}
+} */
 section {
   background: white;
-  font-family: "Outfit";
+  /* font-family: "Outfit"; */
   font-size: 10;
 }
 h1 {
@@ -46,11 +46,62 @@ header {
 
 # Where I work
 
-Today, a Mobile Engineer at ElevenLabs:
-<<ElevenLabs>>
+![bg left:33% 50%](./images/elevenlabs-logo-black.svg)
+
+Today, a Mobile Engineer at ElevenLabs
 <!-- _header: '' -->
 <!-- _footer: '' -->
 <!-- _paginate: false -->
+
+--- 
+
+# Where I am from
+
+- Born in Odesa, Ukraine
+
+- Support Odesa local charity [Monstrov.org](https://monstrov.org/stop-war-in-ukraine/)
+
+---
+
+# What is happening where I am from
+
+https://dou.ua/memorial/#RuslanKolosovskyi
+
+
+---
+
+# Let's meditate
+
+- Close your eyes and imagine
+- Your day is starting
+- You picked a fresh drink
+- You are at your workstation
+- Ray of sun is illuminating your work desk
+- The project is open, and you know exactly what you need to do
+- You do the changes and run the project
+- In a snap, your product is launched and you can see the results of your work
+
+---
+
+# Does it work this way in your reality?
+
+- I can tell for sure my reality is different.
+
+---
+
+# My last talk was at Swift Connection 2025
+
+- Met Peter Steinberger
+- He thinks mobile development is cooked
+- His web technologies based projects build and test time is measured in seconds
+
+_Well, he also thinks we don't need mobile apps all together, but let's focus at one thing at a time._
+
+---
+
+# Have we got used to the current state of affairs?
+
+Is there anything we can do?
 
 ---
 
@@ -119,7 +170,7 @@ Yes, we have a clean build and incremental build
 
 ---
 
-# Compiling Swift is slow
+# Compiling Swift is generally slower than compiling many other languages
 
 ---
 
@@ -150,11 +201,36 @@ Yes, we have a clean build and incremental build
 
 ---
 
-# Optimizing 
+# Upload telemetry to a google sheet
+
+Something I learned in my startup years is that a Google Sheet could be a surprisingly potent database:
+
+```ruby
+require "google/apis/sheets_v4"
+require "googleauth"
+require "googleauth/stores/file_token_store"
+
+// given spreadsheet_id and service_account_json
+
+service = Google::Apis::SheetsV4::SheetsService.new
+service.authorization = Google::Auth::ServiceAccountCredentials.make_creds(
+          json_key_io: StringIO.new(service_account_json),
+          scope: Google::Apis::SheetsV4::AUTH_SPREADSHEETS)
+
+// values_rows contain the values to upload
+
+value_range_object = Google::Apis::SheetsV4::ValueRange.new(majorDimension: "ROWS", values: values_rows)
+
+response = service.append_spreadsheet_value(
+          spreadsheet_id,
+          stat_name + "!A2",
+          value_range_object,
+          value_input_option: VALUE_INPUT_OPTION)
+```
 
 ---
 
-# How hard it can be?
+# How hard caching can be?
 
 > There are only two hard things in Computer Science: cache invalidation and naming things.
 
@@ -220,19 +296,28 @@ Some tasks cannot be parallelized (linking, code signing).
 
 ---
 
+# Why monoliths are bad for incremental builds
+
+---
+
 # Enter Modularization
 
 ---
 
-# Tuist
+# Tuist, Bazel & Buck
 
----
-
-# Bazel & Buck
+| Problem | Xcode native | Tuist | Bazel & Buck |
+|--------|--------------|-------|-------|
+| Graph clarity | meh | good | strict |
+| Remote cache | no | yes | yes |
+| Dev friction | low | low | high |
+| Migration cost | none | low | extreme |
 
 ---
 
 # Resources packaging
+
+
 
 ---
 
