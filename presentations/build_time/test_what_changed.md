@@ -290,9 +290,15 @@ Some tasks cannot be parallelized (linking, code signing).
 
 # Warnings for compilation duration
 
-`-Xfrontend -debug-time-function-bodies`
-`-warn-long-function-bodies=200`
-`-warn-long-expression-type-checking=200`
+Build settings -> Other Swift Flags
+
+```
+-Xfrontend -warn-long-expression-type-checking=20
+-Xfrontend -warn-long-function-bodies=50
+-Xfrontend -debug-time-function-bodies
+-Xfrontend -debug-time-compilation
+-Xfrontend -driver-time-compilation
+```
 
 ---
 
