@@ -117,7 +117,7 @@ Michael 'Mike' Gerasymenko
 Appdevcon 2026
 
 <!-- _paginate: false -->
----
+<!-- ---
 
 # Where I work
 
@@ -140,7 +140,7 @@ Born in Odesa, Ukraine
 
 Local charity [Monstrov.org](https://monstrov.org/stop-war-in-ukraine/)
 
-![bg right](./images/flower.jpg)
+![bg right](./images/odesa.png)
 
 ---
 
@@ -153,11 +153,13 @@ https://dou.ua/memorial/
 # Imagine
 
 → Close your eyes and imagine
-→ Your day is starting, you picked a fresh drink
-→ Ray of sun is illuminating your work desk
+→ Your day is starting
+→ Ray of sun is on your work desk
 → The project is open, and you know exactly what you need to do
 → You do the changes and run the project
-→ In a snap, your product is launched and you can see the results of your work
+→ In a snap, your app is launched <!-- and you can see the results of your work -->
+
+![bg 110% left:33%](./images/thinker.png)
 
 ---
 
@@ -264,7 +266,7 @@ Yes, we have a clean build and incremental build.
 
 ---
 
-# `03` AI is making your project even bigger (slop)
+# `03` AI is making your project even bigger
 
 ---
 
@@ -310,7 +312,7 @@ You probably already know how long your build is taking on the CI, but do you ke
 
 ---
 
-# Upload telemetry to a Google Sheet
+# Upload Telemetry to a Google Sheet
 
 <!-- Something I learned in my startup years is that a Google Sheet could be a surprisingly potent database.
 Startup mindset
@@ -343,17 +345,17 @@ response = service.append_spreadsheet_value(
 
 # Compile Time Settings
 
-→ Defer dSYM creation
+<!-- → Defer dSYM creation
 → Build Active Architecture Only / Architectures
 → Compilation Mode
 → Optimization Level
-→ Build system (Legacy/New Xcode 10)
+→ Build system (Legacy/New Xcode 10) -->
 
 ![bg left:33%](./images/warrior.jpg)
 
----
+<!-- ---
 
-# Baseline
+# Baseline -->
 
 ---
 
@@ -408,6 +410,8 @@ Phil Karlton
 
 ---
 
+# So It's Actually Hard
+
 Xcode needs to do a bunch of work to make sure caching happens correctly. 
 
 It's not always easy.
@@ -420,9 +424,58 @@ It's not always easy.
 
 ---
 
-# Xcode: Build Timeline
+# Xcode: Build Timeline (clean build)
 
 ![](./images/clean.png)
+
+Editor → Open Timeline
+
+---
+
+# Xcode: Build Timeline (incremental build)
+
+![](./images/incremental.png)
+
+→ Clean build depends on the number of cores
+→ Incremental on the core performance
+
+---
+
+# Take Away
+
+Xcode is optimizing to utilize all available CPU cores to distribute the compilation work.
+
+Some tasks cannot be parallelized (linking, code signing, etc.).
+
+---
+
+# High Level Build Steps
+
+Xcode → swift-driver → swift-frontend → LLVM → linker
+
+---
+
+# Swift Driver
+
+→ Analyzes inputs
+→ Constructs the compilation plan
+→ Schedules compilation jobs
+→ Invokes swift-frontend, LLVM, linker, etc.
+→ Manages incremental builds and dependencies
+
+<!--
+When builds feel slow, we often blame the compiler.
+But most of the time, the driver is making conservative decisions because it cannot safely reuse results.
+
+If you change one file:
+
+Driver decides:
+
+👉 only recompile that file
+👉 recompile dependent files
+👉 rebuild whole module
+👉 invalidate downstream modules
+-->
 
 --- 
 
@@ -437,28 +490,91 @@ It's not always easy.
 
 **`03`** Run Script Input/Output configuration
 
+<!-- When we talk about incremental builds, one hidden problem is how changes propagate across module boundaries.
+
+By default, Swift modules are extremely fragile from a build-system perspective.
+A tiny public API change can invalidate every downstream target and force a rebuild of a large portion of your dependency graph.
+
+That’s where these settings come in.
+
+⸻
+
+BUILD_LIBRARY_FOR_DISTRIBUTION enables stable module interfaces.
+Instead of depending on compiler-specific binary metadata, downstream targets can rely on a textual interface that survives compiler updates and reduces rebuild churn.
+
+⸻
+
+SWIFT_ENABLE_LIBRARY_EVOLUTION allows a module to evolve without breaking its ABI.
+This is especially useful for frameworks and shared modules that change frequently but shouldn’t force massive recompilation of dependents.
+
+⸻
+
+And SWIFT_MODULE_INTERFACE generates .swiftinterface files, which are human-readable module descriptions.
+These interfaces make dependency boundaries clearer and help the build system understand what actually changed.
+
+⸻
+
+The important takeaway is not the flags themselves.
+
+The real idea is:
+
+Stable module boundaries reduce cache invalidation and improve incremental builds.
+
+In other words, build speed is strongly influenced by API stability and module design, not just compiler performance.
+-->
+
 ---
 
-# Warnings for compilation duration
+# Warnings for Compilation Duration
 
 Build settings → Other Swift Flags (`OTHER_SWIFT_FLAGS`)
 
 ```
 -Xfrontend -warn-long-expression-type-checking=100
 -Xfrontend -warn-long-function-bodies=100
+```
+
+---
+
+# Other Useful Flags 
+
+```
 -Xfrontend -debug-time-function-bodies
 -Xfrontend -debug-time-compilation
 -Xswiftc -driver-time-compilation
 -Xfrontend -stats-output-dir
 ```
 
----
+<!-- 
+When builds feel slow, the instinct is often to guess where the time is going.
+But modern Swift compilation is complex enough that guessing usually leads to optimizing the wrong thing.
 
-# Multi-core and it's Bottlenecks
+These flags help turn compilation into something measurable.
 
-Xcode is optimizing to utilize all available CPU cores to distribute the compilation work.
+⸻
 
-Some tasks cannot be parallelized (linking, code signing).
+-Xfrontend -debug-time-function-bodies reports how long each function takes to compile and type-check.
+This is extremely useful for identifying problematic expressions, especially in SwiftUI or heavily generic code, where a single function can silently add seconds to build time.
+
+⸻
+
+-Xfrontend -debug-time-compilation gives a higher-level breakdown of frontend compilation phases.
+It helps answer the question: is the compiler slow, or is a specific part of the pipeline slow?
+
+⸻
+
+-Xswiftc -driver-time-compilation operates one level higher — at the compiler driver.
+It shows how long each compilation job takes, which is useful when investigating scheduling, parallelization, or unexpectedly repeated compile tasks.
+
+⸻
+
+And finally, -Xfrontend -stats-output-dir exports structured compiler statistics.
+This is more advanced, but it allows teams to aggregate compilation metrics over time and build their own telemetry around build performance.
+
+⸻
+
+ -->
+
 
 ---
 
@@ -505,5 +621,8 @@ https://gera.cx/posts/cocoapods-resources
 ![bg right:33%](./images/happy.jpg)
 
 - Art Institute of Chicago
-- Dnio by Alvaro Reyes / Unsplash
-- Sunflower by Wolfgang Hasselmann / Unsplash
+- Some AI for style transfer
+
+<!-- _paginate: false -->
+<!-- - Dnio by Alvaro Reyes / Unsplash 
+- Sunflower by Wolfgang Hasselmann / Unsplash-->
