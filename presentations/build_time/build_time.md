@@ -110,7 +110,7 @@ header {
 }
 </style>
 
-# THE FAST AND THE CURIOUS: OPTIMIZING PROJECT BUILDS FOR MAXIMUM SPEED
+# The Fast and the Curious: Optimizing Projects for Maximum Speed
 
 Michael 'Mike' Gerasymenko
 
@@ -274,6 +274,16 @@ Yes, we have a clean build and incremental build.
 
 → For CI, clean build must be optimized
 → For local development, incremental builds must be fast
+
+---
+
+# Side Note
+
+→ Please don't forget to remove features
+→ Start by checking disabled feature flags
+→ [peripheryapp/periphery](https://github.com/peripheryapp/periphery) can help
+
+![bg left:33%](./images/struggle.jpg)
 
 ---
 
@@ -608,11 +618,9 @@ This is more advanced, but it allows teams to aggregate compilation metrics over
 
 ![bg left:33%](./images/sea-beasts.jpg)
 
-Cocoapods are deprecated. In case you are still using them, stop. 
-
-Also, they have a significant issue with asset catalog compilation, read more here:
-
-https://gera.cx/posts/cocoapods-resources
+→ Cocoapods are deprecated.
+→ Also, cocoapods have a significant issue with asset catalog compilation
+→ https://gera.cx/posts/cocoapods-resources
 
 ---
 
@@ -620,8 +628,8 @@ https://gera.cx/posts/cocoapods-resources
 
 ![bg right:33%](./images/happy.jpg)
 
-- Art Institute of Chicago
-- Some AI for style transfer
+→ Art Institute of Chicago
+→ Some AI for style transfer
 
 <!-- _paginate: false -->
 <!-- - Dnio by Alvaro Reyes / Unsplash 
