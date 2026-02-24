@@ -150,43 +150,46 @@ https://dou.ua/memorial/
 
 ---
 
-# Let's meditate
+# Imagine
 
-- Close your eyes and imagine
-- Your day is starting
-- You picked a fresh drink
-- You are at your workstation
-- Ray of sun is illuminating your work desk
-- The project is open, and you know exactly what you need to do
-- You do the changes and run the project
-- In a snap, your product is launched and you can see the results of your work
+→ Close your eyes and imagine
+→ Your day is starting, you picked a fresh drink
+→ Ray of sun is illuminating your work desk
+→ The project is open, and you know exactly what you need to do
+→ You do the changes and run the project
+→ In a snap, your product is launched and you can see the results of your work
 
 ---
 
-# Does it work this way in your reality?
+# Is it easy to imagine?
 
-- I can tell for sure my reality is different.
+I can tell for sure my reality is different
 
 ---
 
-# My last talk was at Swift Connection 2025
+# Is it impactful?
 
-- Met Peter Steinberger
-- He thinks mobile development is cooked
-- His web technologies based projects build and test time is measured in seconds
 
-_Well, he also thinks we don't need mobile apps all together, but let's focus at one thing at a time._
+---
+
+# Thought Leaders
+
+![bg left 100%](./images/swift-connection.jpg)
+
+→ Met Peter Steinberger
+→ He thinks mobile development is cooked
+→ His web projects build and test time is measured in seconds
+
+<!-- _Well, he also thinks we don't need mobile apps all together, but let's focus at one thing at a time._ -->
 
 ---
 
 # Have we got used to the current state of affairs?
 
-Is there anything we can do?
-
 ---
 
 # Let's start from the beginning
-
+<!--
 ---
 
 ![bg](./images/objc.jpg)
@@ -204,11 +207,14 @@ Is there anything we can do?
 
 # What actually happens during the build?
 
+![bg right](./images/ruins.jpg)
+
+<!-- 
 ---
 
 ## Xcode meditate?
 
-## Fans spin?
+## Fans spin? -->
 
 ---
 
@@ -264,19 +270,21 @@ Yes, we have a clean build and incremental build.
 
 # Different goals
 
-For CI, clean build must be optimized
-For local development, incremental builds must be fast
+→ For CI, clean build must be optimized
+→ For local development, incremental builds must be fast
 
 ---
 
 # We are going to use three metrics
 
-**`01`** Clean Build _<sub>Δ</sub>t_
+**`01`** Clean Build
 **`02`** Incremental (no changes)
 **`03`** Incremental (one file change)
 
-Let's take the initial value as 100% to help following the improvements.
+<!-- Let's take the initial value as 100% to help following the improvements. -->
 
+![bg right:33%](./images/scholar.jpg)
+<!-- _paginate: false -->
 ---
 
 # Local: In Xcode
@@ -331,24 +339,6 @@ response = service.append_spreadsheet_value(
           value_input_option: VALUE_INPUT_OPTION)
 ```
 
----
-
-# Improving incremental and clean builds: Caching
-
----
-
-# How hard caching can be?
-
-> There are only two hard things in Computer Science: cache invalidation and naming things.
-
-Phil Karlton
-
----
-
-Xcode needs to do a bunch of work to make sure caching happens correctly. 
-
-It's not always easy.
-
 --- 
 
 # Compile Time Settings
@@ -357,7 +347,9 @@ It's not always easy.
 → Build Active Architecture Only / Architectures
 → Compilation Mode
 → Optimization Level
-→ Build system (Legacy vs New Xcode 10)
+→ Build system (Legacy/New Xcode 10)
+
+![bg left:33%](./images/warrior.jpg)
 
 ---
 
@@ -367,11 +359,12 @@ It's not always easy.
 
 # dSYM
 
+`DEBUG_INFORMATION_FORMAT[config=Release] = dwarf-with-dsym`
 `DEBUG_INFORMATION_FORMAT[config=Debug] = dwarf`
 
 ---
 
-# Build Active Architecture Only / Architectures
+# Architectures
 
 `ARCHS = arm64 x86_64`
 `ONLY_ACTIVE_ARCH[config=Debug] = YES`
@@ -394,10 +387,30 @@ It's not always easy.
 
 # Basics done, what Xcode offers to address build time?
 
+→ Xcode 26 Compilation Caching
 → Build Timeline
 → Flags to indicate inter-target dependencies
-→ Xcode 26 Compilation Caching
 → Type Checking Duration
+
+---
+
+# Improving incremental and clean builds: Caching
+
+---
+
+# How hard caching can be?
+
+> There are only two hard things in Computer Science: cache invalidation and naming things.
+
+Phil Karlton
+
+![bg left:33%](./images/beast.jpg)
+
+---
+
+Xcode needs to do a bunch of work to make sure caching happens correctly. 
+
+It's not always easy.
 
 ---
 
@@ -409,22 +422,34 @@ It's not always easy.
 
 # Xcode: Build Timeline
 
+![](./images/clean.png)
+
 --- 
 
 # Xcode: Flags to indicate inter-target dependencies
+
+**`01`** Build Phases → Target Dependencies
+
+**`02`** Library Configuration
+`BUILD_LIBRARY_FOR_DISTRIBUTION`
+`SWIFT_ENABLE_LIBRARY_EVOLUTION`
+`SWIFT_MODULE_INTERFACE`
+
+**`03`** Run Script Input/Output configuration
 
 ---
 
 # Warnings for compilation duration
 
-Build settings -> Other Swift Flags
+Build settings → Other Swift Flags (`OTHER_SWIFT_FLAGS`)
 
 ```
--Xfrontend -warn-long-expression-type-checking=20
--Xfrontend -warn-long-function-bodies=50
+-Xfrontend -warn-long-expression-type-checking=100
+-Xfrontend -warn-long-function-bodies=100
 -Xfrontend -debug-time-function-bodies
 -Xfrontend -debug-time-compilation
--Xfrontend -driver-time-compilation
+-Xswiftc -driver-time-compilation
+-Xfrontend -stats-output-dir
 ```
 
 ---
@@ -439,9 +464,16 @@ Some tasks cannot be parallelized (linking, code signing).
 
 # Why Monoliths Are Bad for Incremental Builds
 
+→ Hard for Xcode to understand the cause and effect and dependencies inside of the module.
+→ Also, same for humans and AI.
+
 ---
 
 # Enter Modularization
+
+![bg right:33%](./images/nice-architecture.jpg)
+
+<!-- _paginate: false -->
 
 ---
 
@@ -458,6 +490,8 @@ Some tasks cannot be parallelized (linking, code signing).
 
 # Resources Packaging
 
+![bg left:33%](./images/sea-beasts.jpg)
+
 Cocoapods are deprecated. In case you are still using them, stop. 
 
 Also, they have a significant issue with asset catalog compilation, read more here:
@@ -468,5 +502,8 @@ https://gera.cx/posts/cocoapods-resources
 
 # Thank you!
 
+![bg right:33%](./images/happy.jpg)
+
+- Art Institute of Chicago
 - Dnio by Alvaro Reyes / Unsplash
 - Sunflower by Wolfgang Hasselmann / Unsplash
