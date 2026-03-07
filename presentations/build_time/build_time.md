@@ -90,15 +90,60 @@ ul li {
 }
 
 pre, code {
-  background: #121212;
-  color: #F8F8F8;
-  font-family: "IBMPlexSans", monospace;
+  background: #0A0A0A;
+  color: #FFFFFF;
+  font-family: "Menlo", "IBMPlexSans", monospace;
+  font-weight: 500;
+  letter-spacing: 0.15px;
+}
+
+.hljs-symbol {
+font-family: "Menlo", "IBMPlexSans", monospace;
 }
 
 pre {
-  padding: 20px;
-  border-radius: 12px;
-  border: 1px solid #2A2A2A;
+  padding: 26px;
+  border-radius: 18px;
+  border: 1px solid #3A3A3A;
+  box-shadow: 0 30px 70px rgba(0,0,0,0.65);
+}
+
+pre code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+}
+
+code {
+  padding: 4px 10px;
+  border-radius: 8px;
+  border: 1px solid #3A3A3A;
+}
+
+.hljs {
+  color: #F8F8F2;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal {
+  color: #FF7EA8;
+  font-weight: 600;
+}
+
+.hljs-string,
+.hljs-title,
+.hljs-name {
+  color: #8BE9FD;
+}
+
+.hljs-comment {
+  color: #7E8C99;
+}
+
+.hljs-number,
+.hljs-attr {
+  color: #F1FA89;
 }
 
 table {
@@ -360,8 +405,8 @@ Yes, we have a clean build and incremental build.
 
 # We are going to use three metrics
 
-**`01`** Clean Build
-**`02`** Incremental
+**`Σ`** Clean Build
+**`δ`** Incremental Build
 
 <!-- Let's take the initial value as 100% to help following the improvements. -->
 
@@ -379,6 +424,24 @@ Yes, we have a clean build and incremental build.
 `defaults write com.apple.dt.Xcode ShowBuildOperationDuration YES`
 
 ![Xcode screenshot from the top status bar showing the build time after the build](./images/xcode-time-report.png)
+
+
+---
+
+# Xcode: Build Timeline (**`Σ`** Clean Build)
+
+![](./images/clean.png)
+
+Editor → Open Timeline
+
+---
+
+# Xcode: Build Timeline (**`δ`** Incremental Build)
+
+![](./images/incremental.png)
+
+→ **`Σ`** Clean Build depends on the number of cores
+→ **`δ`** Incremental Build on the core performance
 
 ---
 
@@ -408,14 +471,14 @@ require "google/apis/sheets_v4"
 require "googleauth"
 require "googleauth/stores/file_token_store"
 
-// given spreadsheet_id and service_account_json
+# given spreadsheet_id and service_account_json
 
 service = Google::Apis::SheetsV4::SheetsService.new
 service.authorization = Google::Auth::ServiceAccountCredentials.make_creds(
           json_key_io: StringIO.new(service_account_json),
           scope: Google::Apis::SheetsV4::AUTH_SPREADSHEETS)
 
-// values_rows contain the values to upload
+# values_rows contain the values to upload
 
 value_range_object = Google::Apis::SheetsV4::ValueRange.new(majorDimension: "ROWS", values: values_rows)
 
@@ -426,62 +489,23 @@ response = service.append_spreadsheet_value(
           value_input_option: VALUE_INPUT_OPTION)
 ```
 
---- 
+---
 
-# Compile Time Settings
-
-<!-- → Defer dSYM creation
-→ Build Active Architecture Only / Architectures
-→ Compilation Mode
-→ Optimization Level
-→ Build system (Legacy/New Xcode 10) -->
-
-![bg left:33%](./images/warrior-inverted.jpg)
-
-<!-- ---
-
-# Baseline -->
+# Let's Make it Faster
 
 ---
 
-# dSYM
+# Less is More
 
-`DEBUG_INFORMATION_FORMAT[config=Release] = dwarf-with-dsym`
-`DEBUG_INFORMATION_FORMAT[config=Debug] = dwarf`
+→ Please don't forget to remove features
+→ Start by checking disabled feature flags
+→ [peripheryapp/periphery](https://github.com/peripheryapp/periphery) can help
 
----
-
-# Architectures
-
-`ARCHS = arm64 x86_64`
-`ONLY_ACTIVE_ARCH[config=Debug] = YES`
+![bg left:33%](./images/struggle-inverted.jpg)
 
 ---
 
-# Compilation Mode
-
-`SWIFT_COMPILATION_MODE[config=Debug] = singlefile`
-`SWIFT_COMPILATION_MODE[config=Release] = wholemodule`
-
----
-
-# Optimization Level
-
-`SWIFT_OPTIMIZATION_LEVEL[config=Debug] = -Onone`
-`SWIFT_OPTIMIZATION_LEVEL[config=Release] = -O`
-
----
-
-# Basics done, what Xcode offers to address build time?
-
-→ Xcode 26 Compilation Caching
-→ Build Timeline
-→ Flags to indicate inter-target dependencies
-→ Type Checking Duration
-
----
-
-# Improving incremental and clean builds: Caching
+# Caching
 
 ---
 
@@ -503,34 +527,72 @@ It's not always easy.
 
 ---
 
+# Basic work Xcode does
+
+→ Target dependency graph
+→ Swift file dependency tracking
+→ Swift incremental compilation
+→ Previous build records
+→ File timestamp changes
+
+---
+
+# Common Things to look at
+
+→ Correct target inputs and outputs
+→ Avoid scripts changing files every time
+→ Check build timeline
+
+---
+
 # Xcode 26 Compilation Caching
 
 `Enable Compilation Caching`
 
----
+→ Xcode stores compiled artifacts keyed by the content of the inputs
+→ “Have we ever compiled this exact input before?”
 
-# Xcode: Build Timeline (clean build)
+--- 
 
-![](./images/clean-inverted.png)
+# Compile Time Settings
 
-Editor → Open Timeline
-
----
-
-# Xcode: Build Timeline (incremental build)
-
-![](./images/incremental-inverted.png)
-
-→ Clean build depends on the number of cores
-→ Incremental on the core performance
+![bg right:33%](./images/warrior.jpg)
 
 ---
 
-# Take Away
+# dSYM
 
-Xcode is optimizing to utilize all available CPU cores to distribute the compilation work.
+### Affecting: **`δ`** Incremental
 
-Some tasks cannot be parallelized (linking, code signing, etc.).
+`DEBUG_INFORMATION_FORMAT[config=Release] = dwarf-with-dsym`
+`DEBUG_INFORMATION_FORMAT[config=Debug] = dwarf`
+
+---
+
+# Architectures
+
+### Affecting: **`δ`**, **`Σ`**
+
+`ARCHS = arm64 x86_64`
+`ONLY_ACTIVE_ARCH[config=Debug] = YES`
+
+---
+
+# Compilation Mode
+
+### Affecting: **`δ`** Incremental
+
+`SWIFT_COMPILATION_MODE[config=Debug] = singlefile`
+`SWIFT_COMPILATION_MODE[config=Release] = wholemodule`
+
+---
+
+# Optimization Level
+
+### Affecting: **`δ`** Incremental
+
+`SWIFT_OPTIMIZATION_LEVEL[config=Debug] = -Onone`
+`SWIFT_OPTIMIZATION_LEVEL[config=Release] = -O`
 
 ---
 
@@ -572,6 +634,8 @@ Driver decides:
 `BUILD_LIBRARY_FOR_DISTRIBUTION`
 `SWIFT_ENABLE_LIBRARY_EVOLUTION`
 `SWIFT_MODULE_INTERFACE`
+
+<!-- TODO: clarify if needed -->
 
 **`03`** Run Script Input/Output configuration
 
@@ -675,6 +739,22 @@ This is more advanced, but it allows teams to aggregate compilation metrics over
 ![bg right:33%](./images/nice-architecture-inverted.jpg)
 
 <!-- _paginate: false -->
+
+---
+
+# Other great tools
+
+---
+
+# Tuist
+
+→ 
+
+---
+
+# Bazel & Buck
+
+→ 
 
 ---
 
