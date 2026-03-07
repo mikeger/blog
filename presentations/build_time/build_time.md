@@ -34,8 +34,8 @@ transition: coverflow
 
 /* Global slide typography */
 section {
-  background: white;
-  color: #333;
+  background: #050505;
+  color: #F5F5F5;
   font-family: "IBMPlexSans";
   font-size: 36px;
   line-height: 1.35;
@@ -70,7 +70,7 @@ h4 {
 }
 
 h1, h2, h3, h4 {
-  color: #0A0F25;
+  color: #FFFFFF;
   font-family: "InstrumentSerif";
   font-style: italic;
 }
@@ -89,14 +89,55 @@ ul li {
   margin: 10px 0;
 }
 
+pre, code {
+  background: #121212;
+  color: #F8F8F8;
+  font-family: "IBMPlexSans", monospace;
+}
+
+pre {
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #2A2A2A;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 28px 0 0 0;
+  background: #0B0B0B;
+  color: #F0F0F0;
+}
+
+th, td {
+  border: 1px solid #2A2A2A;
+  padding: 16px 20px;
+  text-align: left;
+}
+
+th {
+  background: #141414;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+td {
+  background: #0F0F0F;
+  color: #F0F0F0;
+}
+
+tbody tr:nth-child(even) td {
+  background: #141414;
+}
+
 strong {
   font-weight: 650;
-  color: #0A0F25;
+  color: #FFFFFF;
 }
 
 em {
   font-style: italic;
-  color: #555;
+  color: #CFCFCF;
 }
 
 /* Header tweaks */
@@ -108,26 +149,61 @@ header img {
 header {
   width: 100%;
 }
+
+section.title {
+  position: relative;
+  overflow: hidden;
+}
+
+section.title::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 45% 40%, rgba(5,5,5,0.05), rgba(0,0,0,0.8));
+  z-index: 0;
+}
+
+section.title > * {
+  position: relative;
+  z-index: 1;
+}
+
+section.title h1,
+section.title p {
+  text-shadow: 0 6px 22px rgba(0,0,0,0.8), 0 0 30px rgba(0,0,0,0.6);
+}
 </style>
 
-# The Fast and the Curious: Optimizing Projects for Maximum Speed
+<!-- _class: title -->
 
+# The Fast and the Curious: Optimizing Projects for Maximum Speed
 Michael 'Mike' Gerasymenko
 
 Appdevcon 2026
 
+![bg right:](images/adrien-olichon-tftHxIuPPu8-unsplash.jpg)
+
 <!-- _paginate: false -->
-<!-- ---
+
+---
+
+# Who I am
+
+<!-- TODO -->
+
+---
 
 # Where I work
 
-![bg left:33% 50%](./images/elevenlabs-logo-black.svg)
+![bg left:33% 70%](./images/elevenlabs-logo-black.svg)
 
-Mobile at ElevenLabs
+Mobile at ElevenLabs (we are hiring)
+Building the Reader App
 Remotely from Berlin
 
 Read me: [gera.cx](https://gera.cx)
 
+![width:200](images/qr-gera-cx.png)
 
 <!-- _header: '' -->
 <!-- _footer: '' -->
@@ -140,13 +216,18 @@ Born in Odesa, Ukraine
 
 Local charity [Monstrov.org](https://monstrov.org/stop-war-in-ukraine/)
 
+![width:200](images/qr-monstrov.png)
+
 ![bg right](./images/odesa.png)
 
 ---
 
 # What is happening where I am from
 
-https://dou.ua/memorial/
+https://dou.ua/memorial/ ![width:200 bg right:20%](images/memorial-qr.png)
+
+
+![width:140 height:204](images/memorial-RUSLAN_KOLOSOVSKYI.png) ![width:140 height:204](images/memorial_MYKOLA_HUK.png) ![width:140 height:204](images/memorial_RUSLAN_IVAKHNENKO.png) ![width:140 height:204](images/memorial_VIACHESLAV_BUKOVSKYI.png) ![width:140 height:204](images/memorial_VIKTORIA_AMELINA.png)
 
 ---
 
@@ -159,7 +240,7 @@ https://dou.ua/memorial/
 → You do the changes and run the project
 → In a snap, your app is launched <!-- and you can see the results of your work -->
 
-![bg 110% left:33%](./images/thinker.png)
+![bg 110% left:33%](./images/thinker-inverted.png)
 
 ---
 
@@ -176,7 +257,7 @@ I can tell for sure my reality is different
 
 # Thought Leaders
 
-![bg left 100%](./images/swift-connection.jpg)
+![bg left 90%](./images/swift-connection.jpg)
 
 → Met Peter Steinberger
 → He thinks mobile development is cooked
@@ -194,7 +275,7 @@ I can tell for sure my reality is different
 <!--
 ---
 
-![bg](./images/objc.jpg)
+![bg](./images/objc-inverted.jpg)
 
 <!-- No, not from Objective-C -->
 <!-- _header: '' -->
@@ -209,7 +290,7 @@ I can tell for sure my reality is different
 
 # What actually happens during the build?
 
-![bg right](./images/ruins.jpg)
+![bg right](./images/ruins-inverted.jpg)
 
 <!-- 
 ---
@@ -277,26 +358,20 @@ Yes, we have a clean build and incremental build.
 
 ---
 
-# Side Note
-
-→ Please don't forget to remove features
-→ Start by checking disabled feature flags
-→ [peripheryapp/periphery](https://github.com/peripheryapp/periphery) can help
-
-![bg left:33%](./images/struggle.jpg)
-
----
-
 # We are going to use three metrics
 
 **`01`** Clean Build
-**`02`** Incremental (no changes)
-**`03`** Incremental (one file change)
+**`02`** Incremental
 
 <!-- Let's take the initial value as 100% to help following the improvements. -->
 
 ![bg right:33%](./images/scholar.jpg)
 <!-- _paginate: false -->
+
+---
+
+# Measuring
+
 ---
 
 # Local: In Xcode
@@ -361,7 +436,7 @@ response = service.append_spreadsheet_value(
 → Optimization Level
 → Build system (Legacy/New Xcode 10) -->
 
-![bg left:33%](./images/warrior.jpg)
+![bg left:33%](./images/warrior-inverted.jpg)
 
 <!-- ---
 
@@ -416,7 +491,7 @@ response = service.append_spreadsheet_value(
 
 Phil Karlton
 
-![bg left:33%](./images/beast.jpg)
+![bg left:33%](./images/beast-inverted.jpg)
 
 ---
 
@@ -436,7 +511,7 @@ It's not always easy.
 
 # Xcode: Build Timeline (clean build)
 
-![](./images/clean.png)
+![](./images/clean-inverted.png)
 
 Editor → Open Timeline
 
@@ -444,7 +519,7 @@ Editor → Open Timeline
 
 # Xcode: Build Timeline (incremental build)
 
-![](./images/incremental.png)
+![](./images/incremental-inverted.png)
 
 → Clean build depends on the number of cores
 → Incremental on the core performance
@@ -597,7 +672,7 @@ This is more advanced, but it allows teams to aggregate compilation metrics over
 
 # Enter Modularization
 
-![bg right:33%](./images/nice-architecture.jpg)
+![bg right:33%](./images/nice-architecture-inverted.jpg)
 
 <!-- _paginate: false -->
 
@@ -616,7 +691,7 @@ This is more advanced, but it allows teams to aggregate compilation metrics over
 
 # Resources Packaging
 
-![bg left:33%](./images/sea-beasts.jpg)
+![bg left:33%](./images/sea-beasts-inverted.jpg)
 
 → Cocoapods are deprecated.
 → Also, cocoapods have a significant issue with asset catalog compilation
@@ -626,9 +701,10 @@ This is more advanced, but it allows teams to aggregate compilation metrics over
 
 # Thank you!
 
-![bg right:33%](./images/happy.jpg)
+![bg right:33%](./images/happy-inverted.jpg)
 
 → Art Institute of Chicago
+→ Adrien Olichon 
 → Some AI for style transfer
 
 <!-- _paginate: false -->
