@@ -234,7 +234,13 @@ Appdevcon 2026
 
 # Who I am
 
-<!-- TODO -->
+→ Doing iOS since 2009
+→ Author of XcodeSelectiveTesting
+→ ex. Readdle, Wire, CaraCare, Feeld
+
+Blog: [gera.cx](https://gera.cx)
+
+![bg right:33% width:200](images/qr-gera-cx.png)
 
 ---
 
@@ -242,13 +248,10 @@ Appdevcon 2026
 
 ![bg left:33% 70%](./images/elevenlabs-logo-black.svg)
 
-Mobile at ElevenLabs (we are hiring)
-Building the Reader App
-Remotely from Berlin
-
-Read me: [gera.cx](https://gera.cx)
-
-![width:200](images/qr-gera-cx.png)
+→ Mobile at ElevenLabs
+→ Building the Reader App
+→ Remotely from Berlin
+→ ElevenLabs is hiring, check the website
 
 <!-- _header: '' -->
 <!-- _footer: '' -->
@@ -269,7 +272,7 @@ Local charity [Monstrov.org](https://monstrov.org/stop-war-in-ukraine/)
 
 # What is happening where I am from
 
-https://dou.ua/memorial/ ![width:200 bg right:20%](images/memorial-qr.png)
+https://dou.ua/memorial/ ![width:200 bg right:23%](images/memorial-qr.png)
 
 
 ![width:140 height:204](images/memorial-RUSLAN_KOLOSOVSKYI.png) ![width:140 height:204](images/memorial_MYKOLA_HUK.png) ![width:140 height:204](images/memorial_RUSLAN_IVAKHNENKO.png) ![width:140 height:204](images/memorial_VIACHESLAV_BUKOVSKYI.png) ![width:140 height:204](images/memorial_VIKTORIA_AMELINA.png)
@@ -280,7 +283,7 @@ https://dou.ua/memorial/ ![width:200 bg right:20%](images/memorial-qr.png)
 
 → Close your eyes and imagine
 → Your day is starting
-→ Ray of sun is on your work desk
+→ The sun is on your work desk
 → The project is open, and you know exactly what you need to do
 → You do the changes and run the project
 → In a snap, your app is launched <!-- and you can see the results of your work -->
@@ -291,7 +294,7 @@ https://dou.ua/memorial/ ![width:200 bg right:20%](images/memorial-qr.png)
 
 # Is it easy to imagine?
 
-I can tell for sure my reality is different
+I can tell for sure my reality is different.
 
 ---
 
@@ -305,10 +308,10 @@ I can tell for sure my reality is different
 ![bg left 90%](./images/swift-connection.jpg)
 
 → Met Peter Steinberger
-→ He thinks mobile development is cooked
-→ His web projects build and test time is measured in seconds
+→ He is not fond of mobile development
+→ His web projects' build and test time is measured in seconds
 
-<!-- _Well, he also thinks we don't need mobile apps all together, but let's focus at one thing at a time._ -->
+<!-- _Well, he also thinks we don't need mobile apps alltogether, but let's focus at one thing at a time._ -->
 
 ---
 
@@ -348,7 +351,7 @@ I can tell for sure my reality is different
 
 # ~~What actually happens during the build?~~
 
-## Not the right question! Let's try "Five Why"'s.
+## Not the right question! Let's try "Five Why's."
 
 ---
 
@@ -360,27 +363,27 @@ I can tell for sure my reality is different
 
 ---
 
-Swift and other programming languages have a human-friendly syntax, device hardware is expecting a hardware-friendly code to execute. Same applies for the resources.
+Swift and other programming languages have a human-friendly syntax, and device hardware is expecting a hardware-friendly code to execute. The same applies to the resources.
 
 ---
 
-# Xcode is trying it's best
+# Xcode is trying its best
 
 And it's getting better over time.
 
-After initial build is complete, next builds are faster. Why?
+After the initial build is complete, the next builds are faster. Why?
 
-→ Xcode is trying to reuse results of the former builds to make process faster.
+→ Xcode is trying to reuse the results of the former builds to make the process faster.
 
 ---
 
 # So, Xcode is caching the build results?
 
-Yes, we have a clean build and incremental build.
+Yes, we have a clean build and an incremental build.
 
 ---
 
-# Why does it still feels slow?
+# Why does it still feel slow?
 
 ---
 
@@ -398,7 +401,7 @@ Yes, we have a clean build and incremental build.
 
 # Different goals
 
-→ For CI, clean build must be optimized
+→ For CI, the clean build must be optimized
 → For local development, incremental builds must be fast
 
 ---
@@ -408,7 +411,7 @@ Yes, we have a clean build and incremental build.
 **`Σ`** Clean Build
 **`δ`** Incremental Build
 
-<!-- Let's take the initial value as 100% to help following the improvements. -->
+<!-- Let's take the initial value as 100% to help follow the improvements. -->
 
 ![bg right:33%](./images/scholar.jpg)
 <!-- _paginate: false -->
@@ -428,7 +431,8 @@ Yes, we have a clean build and incremental build.
 
 ---
 
-# Xcode: Build Timeline (**`Σ`** Clean Build)
+# Xcode: Build Timeline
+## **`Σ`** Clean Build
 
 ![](./images/clean.png)
 
@@ -436,7 +440,8 @@ Editor → Open Timeline
 
 ---
 
-# Xcode: Build Timeline (**`δ`** Incremental Build)
+# Xcode: Build Timeline 
+## **`δ`** Incremental Build
 
 ![](./images/incremental.png)
 
@@ -447,8 +452,8 @@ Editor → Open Timeline
 
 # XCMetrics
 
-→ Usually I would recommend it, but not today
-→ Server side component is not building on modern Xcode
+→ Usually, I would recommend OSS projects, but not today
+→ Server-side part is not building on modern Xcode
 → No updates in two years
 → Spotify moved on? Any Spotify engineers in the audience?
 
@@ -509,7 +514,7 @@ response = service.append_spreadsheet_value(
 
 ---
 
-# How hard caching can be?
+# How hard can caching be?
 
 > There are only two hard things in Computer Science: cache invalidation and naming things.
 
@@ -537,17 +542,19 @@ It's not always easy.
 
 ---
 
-# Common Things to look at
+# Common Things to Look at
 
 → Correct target inputs and outputs
 → Avoid scripts changing files every time
 → Check build timeline
 
+![bg right width:560](images/run_script_dependencies.png)
+
 ---
 
 # Xcode 26 Compilation Caching
 
-`Enable Compilation Caching`
+Build settings → `Enable Compilation Caching`
 
 → Xcode stores compiled artifacts keyed by the content of the inputs
 → “Have we ever compiled this exact input before?”
@@ -567,6 +574,8 @@ It's not always easy.
 `DEBUG_INFORMATION_FORMAT[config=Release] = dwarf-with-dsym`
 `DEBUG_INFORMATION_FORMAT[config=Debug] = dwarf`
 
+Result: decrease incremental builds by ca. 30%
+
 ---
 
 # Architectures
@@ -575,6 +584,8 @@ It's not always easy.
 
 `ARCHS = arm64 x86_64`
 `ONLY_ACTIVE_ARCH[config=Debug] = YES`
+
+Result: decrease any builds by up to 50%
 
 ---
 
@@ -596,7 +607,7 @@ It's not always easy.
 
 ---
 
-# High Level Build Steps
+# High-Level Build Steps
 
 Xcode → swift-driver → swift-frontend → LLVM → linker
 
@@ -634,8 +645,6 @@ Driver decides:
 `BUILD_LIBRARY_FOR_DISTRIBUTION`
 `SWIFT_ENABLE_LIBRARY_EVOLUTION`
 `SWIFT_MODULE_INTERFACE`
-
-<!-- TODO: clarify if needed -->
 
 **`03`** Run Script Input/Output configuration
 
@@ -683,6 +692,8 @@ Build settings → Other Swift Flags (`OTHER_SWIFT_FLAGS`)
 -Xfrontend -warn-long-function-bodies=100
 ```
 
+<!-- TODO: Screenshot -->
+
 ---
 
 # Other Useful Flags 
@@ -719,18 +730,113 @@ It shows how long each compilation job takes, which is useful when investigating
 
 And finally, -Xfrontend -stats-output-dir exports structured compiler statistics.
 This is more advanced, but it allows teams to aggregate compilation metrics over time and build their own telemetry around build performance.
-
-⸻
-
  -->
 
 
 ---
 
-# Why Monoliths Are Bad for Incremental Builds
+# Dependencies in Swift Package Manager
 
-→ Hard for Xcode to understand the cause and effect and dependencies inside of the module.
-→ Also, same for humans and AI.
+---
+
+# Swift Package Manager is great
+
+### Affecting: **`Σ`** Clean Build
+
+But you need to be aware of how it works.
+
+→ Package resolution requires dependency repo checkout
+→ Dependencies repos might have very big checkouts
+→ Gigabytes big
+
+---
+
+# Option 1: Use Package Registry
+
+https://tuist.dev/blog/2025/11/26/opening-registry
+
+![width:300 bg right](images/qr-spm-reg.png)
+
+---
+
+# Option 2: Cache Checkouts Folder
+
+→ Cache `SourcePackages/checkouts` between CI runs.
+→ Use `-clonedSourcePackagesDirPath` flag to point Xcode to the cache.
+
+---
+
+## Set clonedSourcePackagesDirPath
+
+```bash
+xcodebuild \
+  -resolvePackageDependencies \
+  -scheme BuildTimeDemo \
+  -clonedSourcePackagesDirPath "$HOME/.cache/spm-checkouts"
+```
+
+---
+
+# Your CI to cache
+
+GitHub Actions example:
+
+```yaml
+- name: Cache SPM checkouts
+  uses: actions/cache@v4
+  with:
+    path: ~/.cache/spm-checkouts
+    key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
+    restore-keys: ${{ runner.os }}-spm-
+
+- name: Resolve Swift packages
+  run: >
+    xcodebuild -resolvePackageDependencies
+    -scheme BuildTimeDemo
+    -clonedSourcePackagesDirPath $HOME/.cache/spm-checkouts
+```
+
+---
+
+# Resources Packaging
+
+→ Resource bundles block your builds as much as Swift files.
+→ Asset catalogs and nib/storyboard compilation scale poorly in monoliths.
+→ Split large asset catalogs into target-specific bundles.
+→ Cache downloaded resources (ML models, videos) outside of Xcode projects.
+
+<!-- 
+Note:
+- Explain how resources can invalidate caches by changing frequently.
+- Encourage profiling asset compilation time in Xcode build logs.
+- Mention that resource modularization mirrors code modularization benefits.
+-->
+
+---
+
+# Asset Catalog Strategies
+
+→ Use `xcassets` pruning tools to remove unused images.
+→ Move marketing-only images into separate, optional bundles.
+
+<!-- 
+Note:
+- Share the story of shaving MBs off builds by dropping unused assets.
+- Highlight how smaller catalogs help incremental builds finish faster.
+- Remind the audience that App Clips force you to audit assets—reuse that work.
+-->
+
+---
+
+# Cocoapods
+
+![bg left:33%](./images/sea-beasts-inverted.jpg)
+
+→ Cocoapods are deprecated.
+→ Also, Cocoapods have a significant issue with asset catalog compilation
+→ https://gera.cx/posts/cocoapods-resources
+
+![width:200](images/qr-gera-cx.png)
 
 ---
 
@@ -739,54 +845,111 @@ This is more advanced, but it allows teams to aggregate compilation metrics over
 ![bg right:33%](./images/nice-architecture-inverted.jpg)
 
 <!-- _paginate: false -->
+---
+
+# Why Monoliths Are Bad for Incremental Builds
+
+→ Hard for Xcode to understand the cause and effect and dependencies inside the module.
+→ Also, the same for humans and AI.
 
 ---
 
-# Other great tools
+# The End
+
+---
+
+# The End or...
+
+---
+
+# What if it were possible
+
+To compile less code, while not removing the code
 
 ---
 
 # Tuist
 
-→ 
+→ Declarative project description that keeps modules consistent.
+→ Remote binary caching supports local and remote builds.
+→ `tuist` generates lightweight workspaces for a single target.
+→ Paid, but worth it.
+
+![bg right:33% width:300](images/tuist.png)
+
+<!--
+Note:
+- Share the anecdote about spinning up a fresh Tuist project in minutes.
+- Call out that Tuist hits incremental builds hardest via caching/focus commands.
+- Mention that the migration is approachable because Tuist outputs standard Xcode projects.
+-->
+
+---
+
+# Remote Binary Caching in Practice
+
+With Tuist:
+
+→ On project generation phase, Tuist creates a fingerprint for each target
+→ Checks if a prebuild version matching the fingerprint is available locally or from the server
+→ Replace targets you are not actively working on with binary representation
 
 ---
 
 # Bazel & Buck
 
-→ 
+![bg left:35% width:150](images/Bazel_logo.svg.png)
+![bg left:35% width:150](images/buck.png)
+
+→ Hermetic builds: every dependency pinned, ideal for massive clean builds.
+→ Remote execution + shared cache can make CI builds dramatically faster.
+→ Multi-language support keeps app + backend tooling aligned.
+→ Requires a dedicated tooling team but pays off at scale.
+
+<!--
+Note:
+- Highlight that Bazel/Buck shine when clean builds dominate (large mono-repos, CI).
+- Share warning: expect months of investment but big rewards for infra-heavy orgs.
+- Mention success stories (Pinterest, Lyft, Meta) to build credibility.
+-->
 
 ---
 
 # Tuist, Bazel & Buck
 
-| Problem | Xcode native | Tuist | Bazel & Buck |
-|--------|--------------|-------|-------|
-| Graph clarity | meh | good | strict |
-| Remote cache | no | yes | yes |
-| Dev friction | low | low | high |
-| Migration cost | none | low | extreme |
+| Problem | Tuist | Bazel & Buck |
+|--------|-------|-------|
+| Graph clarity | good | strict |
+| Remote cache | yes | yes |
+| Dev friction | low | high |
+| Migration cost | low | extreme |
 
 ---
 
-# Resources Packaging
+# Personal Experience
 
-![bg left:33%](./images/sea-beasts-inverted.jpg)
+I went with Tuist in one of my former companies 
+→ CI **`Σ`** Clean Build went from 35 to 11 minutes
+→ **`δ`** Incremental Build went from 30 to 15 seconds
 
-→ Cocoapods are deprecated.
-→ Also, cocoapods have a significant issue with asset catalog compilation
-→ https://gera.cx/posts/cocoapods-resources
+![](images/tuist-effect-ci-inverted.png)
+
+---
+
+# Take Away
+
+→ Less code is better
+→ Faster CPUs are not going to save us
+→ Modularize your app
 
 ---
 
 # Thank you!
+<!-- ![bg right:33%](./images/happy.jpg) -->
+Feedback here:
 
-![bg right:33%](./images/happy-inverted.jpg)
+![bg right width:300](images/the-fast-and-the-curious-optimizing-project-build_gerasymenko_1036965_feedback-code.png)
 
-→ Art Institute of Chicago
-→ Adrien Olichon 
-→ Some AI for style transfer
+Illustrations: Art Institute of Chicago, Adrien Olichon, Some AI for style transfer
 
 <!-- _paginate: false -->
-<!-- - Dnio by Alvaro Reyes / Unsplash 
-- Sunflower by Wolfgang Hasselmann / Unsplash-->
