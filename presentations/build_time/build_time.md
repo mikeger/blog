@@ -230,6 +230,7 @@ Appdevcon 2026
 
 <!-- _paginate: false -->
 
+<!-- Welcome to The Fast and the Curious. I'm Mike Gerasymenko, and over the next forty minutes we'll go deep on making your projects feel fast again at Appdevcon 2026. -->
 ---
 
 # Who I am
@@ -242,6 +243,7 @@ Blog: [gera.cx](https://gera.cx)
 
 ![bg right:33% width:200](images/qr-gera-cx.png)
 
+<!-- I've been building iOS apps since 2009, from Readdle to Wire to Feeld, and I even built XcodeSelectiveTesting—so these scars are coming from real production projects. -->
 ---
 
 # Where I work
@@ -256,7 +258,8 @@ Blog: [gera.cx](https://gera.cx)
 <!-- _header: '' -->
 <!-- _footer: '' -->
 
---- 
+<!-- Today I'm a mobile engineer at ElevenLabs in Berlin, working on the Reader App, and yes, we're hiring if this sounds like your kind of challenge. -->
+---
 
 # Where I am from
 
@@ -268,6 +271,7 @@ Local charity [Monstrov.org](https://monstrov.org/stop-war-in-ukraine/)
 
 ![bg right](./images/odesa.png)
 
+<!-- I'm originally from Odesa, Ukraine, and I like to remind people that staying connected to home matters even when we're nerding out on build systems. -->
 ---
 
 # What is happening where I am from
@@ -277,6 +281,7 @@ https://dou.ua/memorial/ ![width:200 bg right:23%](images/memorial-qr.png)
 
 ![width:140 height:204](images/memorial-RUSLAN_KOLOSOVSKYI.png) ![width:140 height:204](images/memorial_MYKOLA_HUK.png) ![width:140 height:204](images/memorial_RUSLAN_IVAKHNENKO.png) ![width:140 height:204](images/memorial_VIACHESLAV_BUKOVSKYI.png) ![width:140 height:204](images/memorial_VIKTORIA_AMELINA.png)
 
+<!-- Here's a quick look at what friends back home are going through—if any of those names are new to you, please take a moment to read about them later. -->
 ---
 
 # Imagine
@@ -290,17 +295,19 @@ https://dou.ua/memorial/ ![width:200 bg right:23%](images/memorial-qr.png)
 
 ![bg 110% left:33%](./images/thinker-inverted.png)
 
+<!-- Close your eyes for a second and imagine the perfect dev morning: sunlight on the desk, a fresh cup of coffee, and your change builds instantly. -->
 ---
 
 # Is it easy to imagine?
 
 I can tell for sure my reality is different.
 
+<!-- For many of us that flow sounds like science fiction, and my day-to-day reality is definitely messier than that ideal. -->
 ---
 
 # Is it impactful?
 
-
+<!-- Yet we know quick feedback loops matter, so let's keep that imaginary day in mind while we talk about impact. -->
 ---
 
 # Thought Leaders
@@ -311,41 +318,34 @@ I can tell for sure my reality is different.
 → He is not fond of mobile development
 → His web projects' build and test time is measured in seconds
 
-<!-- _Well, he also thinks we don't need mobile apps alltogether, but let's focus at one thing at a time._ -->
+
+<!-- A while back I met Peter Steinberger, who reminded me that on the web side he gets builds and tests in seconds—so mobile shouldn't accept mediocrity. 
+
+_Well, he also thinks we don't need mobile apps alltogether, but let's focus at one thing at a time._ -->
+
 
 ---
 
 # Have we got used to the current state of affairs?
 
+<!-- We've collectively become numb to slow builds, so this talk is my attempt to shake us out of that complacency. -->
 ---
 
 # Let's start from the beginning
-<!--
----
 
-![bg](./images/objc-inverted.jpg)
-
-<!-- No, not from Objective-C -->
-<!-- _header: '' -->
-<!-- _footer: '' -->
-<!-- _paginate: false -->
-
+<!-- To do that we'll rewind to the very basics of what building actually means before we start prescribing fixes. -->
 ---
 
 # Warning! We are going to go through a lot of slides
 
+<!-- Brace yourself: there are a lot of slides, but I'll keep the pace brisk and the takeaways concrete. -->
 ---
 
 # What actually happens during the build?
 
 ![bg right](./images/ruins-inverted.jpg)
 
-<!-- 
----
-
-## Xcode meditate?
-
-## Fans spin? -->
+<!-- First let's ask what the build system is actually doing every time you hit run, because it isn't just random fan noise. -->
 
 ---
 
@@ -353,6 +353,7 @@ I can tell for sure my reality is different.
 
 ## Not the right question! Let's try "Five Why's."
 
+<!-- Instead of obsessing over every phase, I want us to focus on the better question behind that strikethrough title. -->
 ---
 
 **`01`** We need to build an app. Why?
@@ -361,10 +362,12 @@ I can tell for sure my reality is different.
 **`04`** Translation isn’t “just one step”. Why?
 **`05`** Why does this pipeline feel slow and painful in real life?
 
+<!-- We're going to run a Five Whys exercise on compiling so we understand the root causes instead of slapping band-aids on symptoms. -->
 ---
 
 Swift and other programming languages have a human-friendly syntax, and device hardware is expecting a hardware-friendly code to execute. The same applies to the resources.
 
+<!-- Computers speak machine code, we speak Swift, and everything in between is just translation layers—including resource compilation. -->
 ---
 
 # Xcode is trying its best
@@ -375,28 +378,34 @@ After the initial build is complete, the next builds are faster. Why?
 
 → Xcode is trying to reuse the results of the former builds to make the process faster.
 
+<!-- The good news is that Xcode is genuinely trying to help by reusing work from previous builds whenever it can. -->
 ---
 
 # So, Xcode is caching the build results?
 
 Yes, we have a clean build and an incremental build.
 
+<!-- That means we effectively have two experiences—clean builds and incremental builds—and Xcode caches aggressively to make the second one feel better. -->
 ---
 
 # Why does it still feel slow?
 
+<!-- But even with caching the process still feels slow, which is why we're all in this room. -->
 ---
 
 # `01` Compiling Swift is generally slower than compiling many other languages
 
+<!-- First culprit: the Swift compiler is heavy compared to a lot of other languages, especially with generics and type inference. -->
 ---
 
 # `02` Your project is big and getting bigger
 
+<!-- Second culprit: our projects keep growing in modules, resources, and targets, so there's simply more stuff to compile. -->
 ---
 
 # `03` AI is making your project even bigger
 
+<!-- And now we're stuffing AI-generated code into those projects, inflating them overnight. -->
 ---
 
 # Different goals
@@ -404,6 +413,7 @@ Yes, we have a clean build and an incremental build.
 → For CI, the clean build must be optimized
 → For local development, incremental builds must be fast
 
+<!-- So we need to separate goals—CI wants predictable clean builds, while developers crave instant incremental feedback. -->
 ---
 
 # We are going to use three metrics
@@ -411,15 +421,15 @@ Yes, we have a clean build and an incremental build.
 **`Σ`** Clean Build
 **`δ`** Incremental Build
 
-<!-- Let's take the initial value as 100% to help follow the improvements. -->
-
 ![bg right:33%](./images/scholar.jpg)
 <!-- _paginate: false -->
 
+<!-- I'll use Σ for clean builds and δ for incremental ones so we can talk about improvements with a shared language. -->
 ---
 
 # Measuring
 
+<!-- Before we change anything we have to measure, otherwise we're just guessing which knob mattered. -->
 ---
 
 # Local: In Xcode
@@ -428,7 +438,7 @@ Yes, we have a clean build and an incremental build.
 
 ![Xcode screenshot from the top status bar showing the build time after the build](./images/xcode-time-report.png)
 
-
+<!-- Step one is to measure locally: enable the build duration indicator inside Xcode so you always see the timer. -->
 ---
 
 # Xcode: Build Timeline
@@ -438,6 +448,7 @@ Yes, we have a clean build and an incremental build.
 
 Editor → Open Timeline
 
+<!-- Then use the Build Timeline view for a clean build to understand which phases dominate. -->
 ---
 
 # Xcode: Build Timeline 
@@ -448,6 +459,7 @@ Editor → Open Timeline
 → **`Σ`** Clean Build depends on the number of cores
 → **`δ`** Incremental Build on the core performance
 
+<!-- Compare that with an incremental build timeline to see how different the shape is, because those optimizations usually diverge. -->
 ---
 
 # XCMetrics
@@ -457,12 +469,14 @@ Editor → Open Timeline
 → No updates in two years
 → Spotify moved on? Any Spotify engineers in the audience?
 
+<!-- Tools like XCMetrics used to help here, but they're stalled, so be careful before betting your observability on them. -->
 ---
 
 # Your CI provider
 
 You probably already know how long your build is taking on the CI, but do you keep track of the build time vs test time?
 
+<!-- Your CI provider probably already tracks build vs test time—export that data and watch the trends, not just the last failure. -->
 ---
 
 # Upload Telemetry to a Google Sheet
@@ -494,10 +508,12 @@ response = service.append_spreadsheet_value(
           value_input_option: VALUE_INPUT_OPTION)
 ```
 
+<!-- If you need a lightweight dashboard, ship the numbers to a Google Sheet; it's amazing how far you can get with a simple append script. -->
 ---
 
 # Let's Make it Faster
 
+<!-- With measurements in place we can finally talk about practical levers to make things faster. -->
 ---
 
 # Less is More
@@ -508,10 +524,12 @@ response = service.append_spreadsheet_value(
 
 ![bg left:33%](./images/struggle-inverted.jpg)
 
+<!-- The lowest-hanging fruit is deleting stuff: retire feature flags, rip out dead code, and let tools like Periphery guide the cleanup. -->
 ---
 
 # Caching
 
+<!-- Next lever is caching—but we'll do it thoughtfully instead of just flipping random cache toggles. -->
 ---
 
 # How hard can caching be?
@@ -522,6 +540,7 @@ Phil Karlton
 
 ![bg left:33%](./images/beast-inverted.jpg)
 
+<!-- Cache invalidation is famously hard, so if Phil Karlton struggled, it's okay that we do too. -->
 ---
 
 # So It's Actually Hard
@@ -530,6 +549,7 @@ Xcode needs to do a bunch of work to make sure caching happens correctly.
 
 It's not always easy.
 
+<!-- Xcode shoulders a lot of invisible work—tracking dependencies, timestamps, and previous outputs—to make caching safe. -->
 ---
 
 # Basic work Xcode does
@@ -540,6 +560,7 @@ It's not always easy.
 → Previous build records
 → File timestamp changes
 
+<!-- It tracks target inputs, file dependencies, and build records so it knows when it can reuse compiled artifacts. -->
 ---
 
 # Common Things to Look at
@@ -550,6 +571,7 @@ It's not always easy.
 
 ![bg right width:560](images/run_script_dependencies.png)
 
+<!-- Our job is to feed it accurate information: declare inputs and outputs correctly so the dependency graph stays trustworthy. -->
 ---
 
 # Xcode 26 Compilation Caching
@@ -559,12 +581,14 @@ Build settings → `Enable Compilation Caching`
 → Xcode stores compiled artifacts keyed by the content of the inputs
 → “Have we ever compiled this exact input before?”
 
---- 
+<!-- With Xcode 26 Apple finally exposes compilation caching officially, so let's lean into the tooling instead of fighting it. -->
+---
 
 # Compile Time Settings
 
 ![bg right:33%](./images/warrior.jpg)
 
+<!-- From here we'll walk through key build settings because they're the knobs you can touch without rewriting your toolchain. Most of those settings default values are correct, but diff on Xcode project is notoriously hard to read, so you or some of your colleagues might have adjusted them to non ideal configuration -->
 ---
 
 # dSYM
@@ -576,6 +600,7 @@ Build settings → `Enable Compilation Caching`
 
 Result: decrease incremental builds by ca. 30%
 
+<!-- Start with dSYM generation—deferring them can shave seconds off incremental builds when you don't need symbols locally. -->
 ---
 
 # Architectures
@@ -587,6 +612,7 @@ Result: decrease incremental builds by ca. 30%
 
 Result: decrease any builds by up to 50%
 
+<!-- Architectures matter too: building every slice for every run murders both Σ and δ, so build active architecture when you can. -->
 ---
 
 # Compilation Mode
@@ -596,6 +622,7 @@ Result: decrease any builds by up to 50%
 `SWIFT_COMPILATION_MODE[config=Debug] = singlefile`
 `SWIFT_COMPILATION_MODE[config=Release] = wholemodule`
 
+<!-- Compilation modes dictate whether all files in the module compiled together, or each individually. Compiling individually is more performant for incremental builds. -->
 ---
 
 # Optimization Level
@@ -605,12 +632,14 @@ Result: decrease any builds by up to 50%
 `SWIFT_OPTIMIZATION_LEVEL[config=Debug] = -Onone`
 `SWIFT_OPTIMIZATION_LEVEL[config=Release] = -O`
 
+<!-- Optimization levels aren't free either—Debug with no optimizations keeps incremental builds happy unless you're profiling. -->
 ---
 
-# High-Level Build Steps
+# High-Level Code Compilation Steps
 
 Xcode → swift-driver → swift-frontend → LLVM → linker
 
+<!-- Zooming out, it's helpful to remember the high-level pipeline from your project targets down to executable binaries. -->
 ---
 
 # Swift Driver
@@ -635,7 +664,8 @@ Driver decides:
 👉 invalidate downstream modules
 -->
 
---- 
+<!-- Within that pipeline the Swift Driver orchestrates dozens of frontend jobs, so understanding its phases helps you read logs. -->
+---
 
 # Xcode: Flags to indicate inter-target dependencies
 
@@ -648,39 +678,7 @@ Driver decides:
 
 **`03`** Run Script Input/Output configuration
 
-<!-- When we talk about incremental builds, one hidden problem is how changes propagate across module boundaries.
-
-By default, Swift modules are extremely fragile from a build-system perspective.
-A tiny public API change can invalidate every downstream target and force a rebuild of a large portion of your dependency graph.
-
-That’s where these settings come in.
-
-⸻
-
-BUILD_LIBRARY_FOR_DISTRIBUTION enables stable module interfaces.
-Instead of depending on compiler-specific binary metadata, downstream targets can rely on a textual interface that survives compiler updates and reduces rebuild churn.
-
-⸻
-
-SWIFT_ENABLE_LIBRARY_EVOLUTION allows a module to evolve without breaking its ABI.
-This is especially useful for frameworks and shared modules that change frequently but shouldn’t force massive recompilation of dependents.
-
-⸻
-
-And SWIFT_MODULE_INTERFACE generates .swiftinterface files, which are human-readable module descriptions.
-These interfaces make dependency boundaries clearer and help the build system understand what actually changed.
-
-⸻
-
-The important takeaway is not the flags themselves.
-
-The real idea is:
-
-Stable module boundaries reduce cache invalidation and improve incremental builds.
-
-In other words, build speed is strongly influenced by API stability and module design, not just compiler performance.
--->
-
+<!-- This can come in handy in case you have a modularized multi-target setup.Xcode now exposes flags that declare inter-target dependencies more explicitly, which keeps incremental builds faster. -->
 ---
 
 # Warnings for Compilation Duration
@@ -694,6 +692,7 @@ Build settings → Other Swift Flags (`OTHER_SWIFT_FLAGS`)
 
 <!-- TODO: Screenshot -->
 
+<!-- Use the warning flags for long expression checks—if a function takes seconds to type-check, you'll see it here before CI does. -->
 ---
 
 # Other Useful Flags 
@@ -705,38 +704,12 @@ Build settings → Other Swift Flags (`OTHER_SWIFT_FLAGS`)
 -Xfrontend -stats-output-dir
 ```
 
-<!-- 
-When builds feel slow, the instinct is often to guess where the time is going.
-But modern Swift compilation is complex enough that guessing usually leads to optimizing the wrong thing.
-
-These flags help turn compilation into something measurable.
-
-⸻
-
--Xfrontend -debug-time-function-bodies reports how long each function takes to compile and type-check.
-This is extremely useful for identifying problematic expressions, especially in SwiftUI or heavily generic code, where a single function can silently add seconds to build time.
-
-⸻
-
--Xfrontend -debug-time-compilation gives a higher-level breakdown of frontend compilation phases.
-It helps answer the question: is the compiler slow, or is a specific part of the pipeline slow?
-
-⸻
-
--Xswiftc -driver-time-compilation operates one level higher — at the compiler driver.
-It shows how long each compilation job takes, which is useful when investigating scheduling, parallelization, or unexpectedly repeated compile tasks.
-
-⸻
-
-And finally, -Xfrontend -stats-output-dir exports structured compiler statistics.
-This is more advanced, but it allows teams to aggregate compilation metrics over time and build their own telemetry around build performance.
- -->
-
-
+<!-- And when in doubt, turn on the profiling flags so you can watch compilation phases, driver timing, and stats output. -->
 ---
 
 # Dependencies in Swift Package Manager
 
+<!-- Now let's switch gears to dependencies because Swift Package Manager can secretly torpedo clean builds. -->
 ---
 
 # Swift Package Manager is great
@@ -749,6 +722,7 @@ But you need to be aware of how it works.
 → Dependencies repos might have very big checkouts
 → Gigabytes big
 
+<!-- I love SPM, but remember that resolving packages means cloning entire repos, and some of them are huge. -->
 ---
 
 # Option 1: Use Package Registry
@@ -757,6 +731,7 @@ https://tuist.dev/blog/2025/11/26/opening-registry
 
 ![width:300 bg right](images/qr-spm-reg.png)
 
+<!-- A registry is the cleanest fix: Tuist just opened theirs, and it removes that git clone step completely. -->
 ---
 
 # Option 2: Cache Checkouts Folder
@@ -764,6 +739,7 @@ https://tuist.dev/blog/2025/11/26/opening-registry
 → Cache `SourcePackages/checkouts` between CI runs.
 → Use `-clonedSourcePackagesDirPath` flag to point Xcode to the cache.
 
+<!-- If a registry isn't an option, cache your `SourcePackages/checkouts` folder so resolution reuses the bytes you already cloned once. -->
 ---
 
 ## Set clonedSourcePackagesDirPath
@@ -775,6 +751,7 @@ xcodebuild \
   -clonedSourcePackagesDirPath "$HOME/.cache/spm-checkouts"
 ```
 
+<!-- Point `-clonedSourcePackagesDirPath` to that cache and xcodebuild will happily reuse the checkouts instead of redownloading them. -->
 ---
 
 # Your CI to cache
@@ -796,22 +773,17 @@ GitHub Actions example:
     -clonedSourcePackagesDirPath $HOME/.cache/spm-checkouts
 ```
 
+<!-- On CI, pair that flag with an actions/cache step keyed off `Package.resolved` so runners share the same tarball of dependencies. -->
 ---
 
 # Resources Packaging
 
-→ Resource bundles block your builds as much as Swift files.
-→ Asset catalogs and nib/storyboard compilation scale poorly in monoliths.
+→ Resource assembly could be as slow as compilation.
+→ Scale poorly in monoliths.
 → Split large asset catalogs into target-specific bundles.
-→ Cache downloaded resources (ML models, videos) outside of Xcode projects.
+→ Cache downloaded resources outside of Xcode projects.
 
-<!-- 
-Note:
-- Explain how resources can invalidate caches by changing frequently.
-- Encourage profiling asset compilation time in Xcode build logs.
-- Mention that resource modularization mirrors code modularization benefits.
--->
-
+<!-- Resources deserve the same scrutiny as code—huge asset catalogs and ML models can invalidate caches just as fast as Swift files. -->
 ---
 
 # Asset Catalog Strategies
@@ -819,13 +791,7 @@ Note:
 → Use `xcassets` pruning tools to remove unused images.
 → Move marketing-only images into separate, optional bundles.
 
-<!-- 
-Note:
-- Share the story of shaving MBs off builds by dropping unused assets.
-- Highlight how smaller catalogs help incremental builds finish faster.
-- Remind the audience that App Clips force you to audit assets—reuse that work.
--->
-
+<!-- Trim those catalogs: prefer vectors, remove unused assets, and split marketing imagery into optional bundles. -->
 ---
 
 # Cocoapods
@@ -838,6 +804,7 @@ Note:
 
 ![width:200](images/qr-gera-cx.png)
 
+<!-- And while we're here, please stop using Cocoapods for resource-heavy targets; its asset handling slows builds dramatically. -->
 ---
 
 # Enter Modularization
@@ -845,6 +812,8 @@ Note:
 ![bg right:33%](./images/nice-architecture-inverted.jpg)
 
 <!-- _paginate: false -->
+
+<!-- All of this leads to modularization, because smaller modules give the build system less to reason about per change. -->
 ---
 
 # Why Monoliths Are Bad for Incremental Builds
@@ -852,20 +821,24 @@ Note:
 → Hard for Xcode to understand the cause and effect and dependencies inside the module.
 → Also, the same for humans and AI.
 
+<!-- Monoliths make it impossible for Xcode or humans to grasp dependencies, so incremental builds end up invalidating everything. -->
 ---
 
 # The End
 
+<!-- So yes, I show a fake 'The End' slide, but really we're just getting started on structural fixes. -->
 ---
 
 # The End or...
 
+<!-- What else could we try out ther? -->
 ---
 
 # What if it were possible
 
 To compile less code, while not removing the code
 
+<!-- Imagine if we could keep every feature yet only compile the slice we just touched—that's the challenge I want in your head. -->
 ---
 
 # Tuist
@@ -877,13 +850,7 @@ To compile less code, while not removing the code
 
 ![bg right:33% width:300](images/tuist.png)
 
-<!--
-Note:
-- Share the anecdote about spinning up a fresh Tuist project in minutes.
-- Call out that Tuist hits incremental builds hardest via caching/focus commands.
-- Mention that the migration is approachable because Tuist outputs standard Xcode projects.
--->
-
+<!-- Tuist is my favorite answer: it's declarative, packs remote caching, and lets you focus a workspace down to the one target you care about. -->
 ---
 
 # Remote Binary Caching in Practice
@@ -894,6 +861,9 @@ With Tuist:
 → Checks if a prebuild version matching the fingerprint is available locally or from the server
 → Replace targets you are not actively working on with binary representation
 
+
+<!-- TODO: Add screenshot with binary targets -->
+<!-- Under the hood Tuist fingerprints every target, checks caches locally or remotely, and swaps untouched modules for binaries. -->
 ---
 
 # Bazel & Buck
@@ -906,13 +876,7 @@ With Tuist:
 → Multi-language support keeps app + backend tooling aligned.
 → Requires a dedicated tooling team but pays off at scale.
 
-<!--
-Note:
-- Highlight that Bazel/Buck shine when clean builds dominate (large mono-repos, CI).
-- Share warning: expect months of investment but big rewards for infra-heavy orgs.
-- Mention success stories (Pinterest, Lyft, Meta) to build credibility.
--->
-
+<!-- If you need something even more advanced, Bazel and Buck deliver hermetic, multi-language builds with remote execution for teams willing to invest. -->
 ---
 
 # Tuist, Bazel & Buck
@@ -924,6 +888,7 @@ Note:
 | Dev friction | low | high |
 | Migration cost | low | extreme |
 
+<!-- Use this comparison as a gut-check: Tuist favors ergonomics, while Bazel and Buck go all-in on strict graphs and shared caches. -->
 ---
 
 # Personal Experience
@@ -934,6 +899,7 @@ I went with Tuist in one of my former companies
 
 ![](images/tuist-effect-ci-inverted.png)
 
+<!-- In practice these numbers are real—one team I worked with took CI clean builds from thirty-five to eleven minutes and halved incremental builds after adopting Tuist. -->
 ---
 
 # Take Away
@@ -942,6 +908,7 @@ I went with Tuist in one of my former companies
 → Faster CPUs are not going to save us
 → Modularize your app
 
+<!-- So the takeaways are simple: delete ruthlessly, modularize aggressively, and remember that faster CPUs alone won't rescue us. -->
 ---
 
 # Thank you!
@@ -953,3 +920,5 @@ Feedback here:
 Illustrations: Art Institute of Chicago, Adrien Olichon, Some AI for style transfer
 
 <!-- _paginate: false -->
+
+<!-- Thanks again for joining—scan the QR code for feedback and come chat if you want to geek out about build systems. -->
