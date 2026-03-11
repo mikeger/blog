@@ -269,7 +269,7 @@ Local charity [Monstrov.org](https://monstrov.org/stop-war-in-ukraine/)
 
 ![width:200](images/qr-monstrov.png)
 
-![bg right](./images/odesa.png)
+![bg right](./images/odesa-opera.png)
 
 <!-- I'm originally from Odesa, Ukraine, and I like to remind people that staying connected to home matters even when we're nerding out on build systems. -->
 ---
@@ -900,6 +900,15 @@ I went with Tuist in one of my former companies
 ![](images/tuist-effect-ci-inverted.png)
 
 <!-- In practice these numbers are real—one team I worked with took CI clean builds from thirty-five to eleven minutes and halved incremental builds after adopting Tuist. -->
+
+---
+
+# Additional Benefit: Selective Testing
+
+![](images/tuist-effect-dark.png)
+
+→ Free selective testing here: [github.com/mikeger/XcodeSelectiveTesting](https://github.com/mikeger/XcodeSelectiveTesting)
+
 ---
 
 # Take Away
@@ -913,9 +922,9 @@ I went with Tuist in one of my former companies
 
 # Thank you!
 <!-- ![bg right:33%](./images/happy.jpg) -->
-Feedback here:
+Feedback QR code → 
 
-![bg right width:300](images/the-fast-and-the-curious-optimizing-project-build_gerasymenko_1036965_feedback-code.png)
+![bg right width:500](images/the-fast-and-the-curious-optimizing-project-build_gerasymenko_1036965_feedback-code.png)
 
 Illustrations: Art Institute of Chicago, Adrien Olichon, Some AI for style transfer
 
