@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>One model, four targets</title>
+<style>
+  :root {
+    --bg: #FFFFFF;
+    --ink: #111111;
+    --dim: #999999;
+    --mid: #666666;
+    --track: #F0F0F0;
+    --accent: #D83A4A;
+    --source: #111111;
+    --branch: #CCCCCC;
+    --branch-on: #111111;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Roboto", -apple-system, "Helvetica Neue", Arial, sans-serif;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .stage {
+    width: 1200px;
+    max-width: 95vw;
+    height: 600px;
+    position: relative;
+  }
+
+  .title {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: var(--mid);
+    text-transform: uppercase;
+    text-align: center;
+  }
+
+  .source {
+    position: absolute;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 240px;
+    padding: 24px 28px;
+    background: var(--source);
+    color: #FFFFFF;
+    border-radius: 10px;
+    text-align: center;
+    opacity: 0;
+    animation: fadein 0.4s ease forwards 0.2s;
+  }
+
+  .source-name {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+
+  .source-sub {
+    font-size: 13px;
+    color: #AAAAAA;
+    margin-top: 6px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .svg-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .path-line {
+    stroke: var(--branch);
+    stroke-width: 2;
+    fill: none;
+    stroke-dasharray: 400;
+    stroke-dashoffset: 400;
+    transition: stroke-dashoffset 0.8s ease, stroke 0.4s ease;
+  }
+
+  .path-line.on {
+    stroke-dashoffset: 0;
+    stroke: var(--branch-on);
+  }
+
+  .format {
+    position: absolute;
+    top: 260px;
+    width: 200px;
+    padding: 14px 18px;
+    background: #F8F8F8;
+    border: 1.5px solid #D8D8D8;
+    border-radius: 8px;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.4s ease, transform 0.4s ease, border-color 0.4s ease;
+  }
+
+  .format.on {
+    opacity: 1;
+    transform: translateY(0);
+    border-color: var(--ink);
+  }
+
+  .format-name {
+    font-family: "SF Mono", "Menlo", monospace;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .format-sub {
+    font-size: 11px;
+    color: var(--dim);
+    margin-top: 4px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  .target {
+    position: absolute;
+    top: 440px;
+    width: 200px;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  .target.on {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .target-chip {
+    width: 70px;
+    height: 70px;
+    margin: 0 auto 12px;
+    background: #F0F0F0;
+    border: 2px solid var(--ink);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    position: relative;
+  }
+
+  .target-chip::before,
+  .target-chip::after {
+    content: "";
+    position: absolute;
+    background: var(--ink);
+  }
+
+  .target-chip::before {
+    width: 6px; height: 2px;
+    top: 50%; left: -8px;
+    transform: translateY(-50%);
+    box-shadow: 0 -10px 0 0, 0 10px 0 0;
+  }
+
+  .target-chip::after {
+    width: 6px; height: 2px;
+    top: 50%; right: -8px;
+    transform: translateY(-50%);
+    box-shadow: 0 -10px 0 0, 0 10px 0 0;
+  }
+
+  .target-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: 0.5px;
+  }
+
+  .target-sub {
+    font-size: 11px;
+    color: var(--dim);
+    margin-top: 2px;
+    letter-spacing: 0.5px;
+  }
+
+  /* Column positions (centered on stage width 1200) */
+  .col-0 { left: 60px; }
+  .col-1 { left: 320px; }
+  .col-2 { left: 580px; }
+  .col-3 { left: 840px; }
+
+  .caption {
+    position: absolute;
+    bottom: -40px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 18px;
+    color: var(--mid);
+    letter-spacing: 0.5px;
+    font-weight: 500;
+    opacity: 0;
+    animation: fadein 0.5s ease forwards 5.5s;
+  }
+
+  @keyframes fadein { to { opacity: 1; } }
+</style>
+</head>
+<body>
+
+<div class="stage">
+
+  <div class="title">One model. Four targets. Zero portability.</div>
+
+  <div class="source">
+    <div class="source-name">model.pt</div>
+    <div class="source-sub">PyTorch · trained once</div>
+  </div>
+
+  <svg class="svg-layer" viewBox="0 0 1200 600" preserveAspectRatio="none">
+    <!-- Lines from source center (600, 180) to each format box top (col+100, 260) -->
+    <path class="path-line" id="line-0" d="M 600 180 Q 600 220 260 260"></path>
+    <path class="path-line" id="line-1" d="M 600 180 Q 600 220 520 260"></path>
+    <path class="path-line" id="line-2" d="M 600 180 Q 600 220 780 260"></path>
+    <path class="path-line" id="line-3" d="M 600 180 Q 600 220 1040 260"></path>
+  </svg>
+
+  <div class="format col-0" id="fmt-0">
+    <div class="format-name">.mlpackage</div>
+    <div class="format-sub">Core ML</div>
+  </div>
+
+  <div class="format col-1" id="fmt-1">
+    <div class="format-name">.tflite</div>
+    <div class="format-sub">LiteRT</div>
+  </div>
+
+  <div class="format col-2" id="fmt-2">
+    <div class="format-name">.pte</div>
+    <div class="format-sub">ExecuTorch QNN</div>
+  </div>
+
+  <div class="format col-3" id="fmt-3">
+    <div class="format-name">.onnx</div>
+    <div class="format-sub">ONNX Runtime</div>
+  </div>
+
+  <div class="target col-0" id="tgt-0">
+    <div class="target-chip">ANE</div>
+    <div class="target-name">Apple Neural Engine</div>
+    <div class="target-sub">iPhone · Mac</div>
+  </div>
+
+  <div class="target col-1" id="tgt-1">
+    <div class="target-chip">GPU</div>
+    <div class="target-name">GPU delegate</div>
+    <div class="target-sub">generic Android</div>
+  </div>
+
+  <div class="target col-2" id="tgt-2">
+    <div class="target-chip">HTP</div>
+    <div class="target-name">Hexagon NPU</div>
+    <div class="target-sub">Snapdragon only</div>
+  </div>
+
+  <div class="target col-3" id="tgt-3">
+    <div class="target-chip">CPU</div>
+    <div class="target-name">XNNPACK</div>
+    <div class="target-sub">universal fallback</div>
+  </div>
+
+  <div class="caption">Each target needs its own compile step, its own quirks, its own debugging.</div>
+
+</div>
+
+<script>
+  const lines = document.querySelectorAll('.path-line');
+  const formats = document.querySelectorAll('.format');
+  const targets = document.querySelectorAll('.target');
+
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  async function animate() {
+    await sleep(500);
+
+    // Build each branch in sequence, then hold
+    for (let i = 0; i < 4; i++) {
+      lines[i].classList.add('on');
+      await sleep(500);
+      formats[i].classList.add('on');
+      await sleep(300);
+      targets[i].classList.add('on');
+      await sleep(400);
+    }
+  }
+
+  animate();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Matrix × Vector</title>
+<style>
+  :root {
+    --bg: #FFFFFF;
+    --ink: #111111;
+    --dim: #BBBBBB;
+    --active: #111111;
+    --accent: #D83A4A;
+    --cell-size: 72px;
+    --cell-gap: 10px;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Roboto", -apple-system, "Helvetica Neue", Arial, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .stage {
+    display: flex;
+    align-items: center;
+    gap: 36px;
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  .matrix,
+  .vector-in,
+  .vector-out {
+    display: grid;
+    gap: var(--cell-gap);
+  }
+
+  .matrix {
+    grid-template-columns: repeat(4, var(--cell-size));
+    grid-template-rows: repeat(3, var(--cell-size));
+  }
+
+  .vector-in {
+    grid-template-columns: var(--cell-size);
+    grid-template-rows: repeat(4, var(--cell-size));
+  }
+
+  .vector-out {
+    grid-template-columns: var(--cell-size);
+    grid-template-rows: repeat(3, var(--cell-size));
+  }
+
+  .cell {
+    width: var(--cell-size);
+    height: var(--cell-size);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid var(--dim);
+    border-radius: 6px;
+    color: var(--dim);
+    background: var(--bg);
+    transition:
+      color 0.35s ease,
+      border-color 0.35s ease,
+      background 0.35s ease,
+      transform 0.35s ease;
+    position: relative;
+  }
+
+  .cell.on {
+    color: var(--active);
+    border-color: var(--active);
+    background: var(--bg);
+  }
+
+  .cell.pulse {
+    color: var(--bg);
+    border-color: var(--accent);
+    background: var(--accent);
+    transform: scale(1.05);
+  }
+
+  .op {
+    font-size: 48px;
+    color: var(--ink);
+    font-weight: 300;
+  }
+
+  .label {
+    position: absolute;
+    top: -32px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #777;
+  }
+
+  .group {
+    position: relative;
+    padding-top: 32px;
+  }
+
+  .caption {
+    position: fixed;
+    bottom: 48px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 20px;
+    color: #555;
+    letter-spacing: 1px;
+    font-weight: 500;
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+
+  <div class="group">
+    <div class="label">Weights (W)</div>
+    <div class="matrix" id="mat">
+      <!-- 3 rows × 4 cols -->
+      <!-- row 0 -->
+      <div class="cell" data-row="0" data-col="0">w</div>
+      <div class="cell" data-row="0" data-col="1">w</div>
+      <div class="cell" data-row="0" data-col="2">w</div>
+      <div class="cell" data-row="0" data-col="3">w</div>
+      <!-- row 1 -->
+      <div class="cell" data-row="1" data-col="0">w</div>
+      <div class="cell" data-row="1" data-col="1">w</div>
+      <div class="cell" data-row="1" data-col="2">w</div>
+      <div class="cell" data-row="1" data-col="3">w</div>
+      <!-- row 2 -->
+      <div class="cell" data-row="2" data-col="0">w</div>
+      <div class="cell" data-row="2" data-col="1">w</div>
+      <div class="cell" data-row="2" data-col="2">w</div>
+      <div class="cell" data-row="2" data-col="3">w</div>
+    </div>
+  </div>
+
+  <div class="op">·</div>
+
+  <div class="group">
+    <div class="label">Input (x)</div>
+    <div class="vector-in" id="vin">
+      <div class="cell" data-idx="0">x</div>
+      <div class="cell" data-idx="1">x</div>
+      <div class="cell" data-idx="2">x</div>
+      <div class="cell" data-idx="3">x</div>
+    </div>
+  </div>
+
+  <div class="op">=</div>
+
+  <div class="group">
+    <div class="label">Output (y)</div>
+    <div class="vector-out" id="vout">
+      <div class="cell" data-out="0">·</div>
+      <div class="cell" data-out="1">·</div>
+      <div class="cell" data-out="2">·</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="caption">y<sub>i</sub> = Σ w<sub>i,j</sub> · x<sub>j</sub></div>
+
+<script>
+  const matCells = document.querySelectorAll('#mat .cell');
+  const vinCells = document.querySelectorAll('#vin .cell');
+  const voutCells = document.querySelectorAll('#vout .cell');
+
+  const ROWS = 3;
+  const COLS = 4;
+
+  function sleep(ms) {
+    return new Promise(r => setTimeout(r, ms));
+  }
+
+  function clearAll() {
+    matCells.forEach(c => c.classList.remove('on', 'pulse'));
+    vinCells.forEach(c => c.classList.remove('on', 'pulse'));
+    voutCells.forEach(c => c.classList.remove('on', 'pulse'));
+  }
+
+  function matCell(row, col) {
+    return document.querySelector(`#mat .cell[data-row="${row}"][data-col="${col}"]`);
+  }
+
+  async function animateRow(row) {
+    // Highlight the entire row of weights and the full input vector
+    for (let c = 0; c < COLS; c++) {
+      matCell(row, c).classList.add('on');
+    }
+    vinCells.forEach(c => c.classList.add('on'));
+    await sleep(400);
+
+    // Walk through each j: pulse w[row][j] and x[j] together
+    for (let j = 0; j < COLS; j++) {
+      matCell(row, j).classList.add('pulse');
+      vinCells[j].classList.add('pulse');
+      await sleep(280);
+      matCell(row, j).classList.remove('pulse');
+      vinCells[j].classList.remove('pulse');
+    }
+
+    // Fill output cell
+    const out = voutCells[row];
+    out.textContent = 'y';
+    out.classList.add('pulse');
+    await sleep(500);
+    out.classList.remove('pulse');
+    out.classList.add('on');
+
+    // Dim the row and vector
+    for (let c = 0; c < COLS; c++) {
+      matCell(row, c).classList.remove('on');
+    }
+    vinCells.forEach(c => c.classList.remove('on'));
+    await sleep(250);
+  }
+
+  async function cycle() {
+    for (let r = 0; r < ROWS; r++) {
+      await animateRow(r);
+    }
+    await sleep(900);
+    // Reset
+    voutCells.forEach(c => {
+      c.textContent = '·';
+      c.classList.remove('on', 'pulse');
+    });
+    await sleep(600);
+    cycle();
+  }
+
+  cycle();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Weights vs Activations</title>
+<style>
+  :root {
+    --bg: #FFFFFF;
+    --ink: #111111;
+    --dim: #DDDDDD;
+    --weight: #AAAAAA;
+    --weight-active: #333333;
+    --accent: #D83A4A;
+    --cell: 28px;
+    --gap: 4px;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Roboto", -apple-system, "Helvetica Neue", Arial, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .stage {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+  }
+
+  .layer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .layer-name {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #777;
+  }
+
+  .weights {
+    display: grid;
+    grid-template-columns: repeat(4, var(--cell));
+    grid-template-rows: repeat(4, var(--cell));
+    gap: var(--gap);
+    padding: 12px;
+    border: 1.5px solid #CCCCCC;
+    border-radius: 10px;
+    background: var(--bg);
+    position: relative;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .weights.firing {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(216, 58, 74, 0.15);
+  }
+
+  .w-cell {
+    width: var(--cell);
+    height: var(--cell);
+    background: var(--weight);
+    border-radius: 3px;
+    transition: background 0.25s ease;
+  }
+
+  .weights.firing .w-cell {
+    background: var(--weight-active);
+  }
+
+  .weights-label {
+    position: absolute;
+    bottom: -22px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 13px;
+    color: #999;
+    letter-spacing: 1px;
+    font-weight: 500;
+  }
+
+  .pipe {
+    width: 48px;
+    height: 2px;
+    background: #EEEEEE;
+    position: relative;
+    overflow: visible;
+  }
+
+  .activation {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    opacity: 0;
+    transition: opacity 0.1s ease;
+  }
+
+  .activation.visible {
+    opacity: 1;
+  }
+
+  .a-cell {
+    width: 14px;
+    height: 14px;
+    background: var(--accent);
+    border-radius: 2px;
+    box-shadow: 0 0 10px rgba(216, 58, 74, 0.5);
+  }
+
+  .legend {
+    position: fixed;
+    bottom: 40px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 48px;
+    font-size: 18px;
+    color: #333;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .swatch-weight {
+    width: 20px;
+    height: 20px;
+    background: var(--weight-active);
+    border-radius: 3px;
+  }
+
+  .swatch-activation {
+    width: 20px;
+    height: 20px;
+    background: var(--accent);
+    border-radius: 3px;
+  }
+
+  .legend-text strong {
+    display: block;
+    font-weight: 700;
+  }
+
+  .legend-text span {
+    font-size: 14px;
+    color: #777;
+  }
+
+  .input-label,
+  .output-label {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #555;
+    width: 70px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+
+  <div class="input-label">Input</div>
+
+  <div class="pipe">
+    <div class="activation" id="a0">
+      <div class="a-cell"></div>
+      <div class="a-cell"></div>
+      <div class="a-cell"></div>
+      <div class="a-cell"></div>
+    </div>
+  </div>
+
+  <div class="layer">
+    <div class="layer-name">Layer 1</div>
+    <div class="weights" id="w1">
+      <!-- 16 cells generated below -->
+      <div class="weights-label">W₁ (fixed)</div>
+    </div>
+  </div>
+
+  <div class="pipe">
+    <div class="activation" id="a1">
+      <div class="a-cell"></div>
+      <div class="a-cell"></div>
+      <div class="a-cell"></div>
+      <div class="a-cell"></div>
+    </div>
+  </div>
+
+  <div class="layer">
+    <div class="layer-name">Layer 2</div>
+    <div class="weights" id="w2">
+      <div class="weights-label">W₂ (fixed)</div>
+    </div>
+  </div>
+
+  <div class="pipe">
+    <div class="activation" id="a2">
+      <div class="a-cell"></div>
+      <div class="a-cell"></div>
+      <div class="a-cell"></div>
+      <div class="a-cell"></div>
+    </div>
+  </div>
+
+  <div class="layer">
+    <div class="layer-name">Layer 3</div>
+    <div class="weights" id="w3">
+      <div class="weights-label">W₃ (fixed)</div>
+    </div>
+  </div>
+
+  <div class="pipe">
+    <div class="activation" id="a3">
+      <div class="a-cell"></div>
+      <div class="a-cell"></div>
+      <div class="a-cell"></div>
+      <div class="a-cell"></div>
+    </div>
+  </div>
+
+  <div class="output-label">Output</div>
+
+</div>
+
+<div class="legend">
+  <div class="legend-item">
+    <div class="swatch-weight"></div>
+    <div class="legend-text">
+      <strong>Weights</strong>
+      <span>Loaded once. Stay in memory.</span>
+    </div>
+  </div>
+  <div class="legend-item">
+    <div class="swatch-activation"></div>
+    <div class="legend-text">
+      <strong>Activations</strong>
+      <span>Flow through, every inference.</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Fill in weight cells for each layer
+  for (const id of ['w1', 'w2', 'w3']) {
+    const w = document.getElementById(id);
+    for (let i = 0; i < 16; i++) {
+      const c = document.createElement('div');
+      c.className = 'w-cell';
+      w.insertBefore(c, w.firstChild);
+    }
+  }
+
+  const activations = ['a0', 'a1', 'a2', 'a3'].map(id => document.getElementById(id));
+  const weights = ['w1', 'w2', 'w3'].map(id => document.getElementById(id));
+
+  // Pipe start positions and width
+  const PIPE_W = 48;
+
+  function show(el) { el.classList.add('visible'); }
+  function hide(el) { el.classList.remove('visible'); }
+  function fire(el) { el.classList.add('firing'); }
+  function unfire(el) { el.classList.remove('firing'); }
+
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  async function travel(activation) {
+    show(activation);
+    // Animate activation across its pipe (left to right)
+    activation.style.transition = 'none';
+    activation.style.left = '0';
+    // Force reflow
+    void activation.offsetWidth;
+    activation.style.transition = 'left 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+    activation.style.left = PIPE_W + 'px';
+    await sleep(800);
+    hide(activation);
+    // Reset position after fade
+    await sleep(100);
+    activation.style.transition = 'none';
+    activation.style.left = '0';
+  }
+
+  async function cycle() {
+    // 1. Input activation arrives
+    await travel(activations[0]);
+
+    // 2. Layer 1 fires
+    fire(weights[0]);
+    await sleep(500);
+    unfire(weights[0]);
+
+    // 3. Activation 1 emerges and travels to Layer 2
+    await travel(activations[1]);
+
+    // 4. Layer 2 fires
+    fire(weights[1]);
+    await sleep(500);
+    unfire(weights[1]);
+
+    // 5. Activation 2 travels
+    await travel(activations[2]);
+
+    // 6. Layer 3 fires
+    fire(weights[2]);
+    await sleep(500);
+    unfire(weights[2]);
+
+    // 7. Output activation
+    await travel(activations[3]);
+
+    await sleep(1200);
+    cycle();
+  }
+
+  cycle();
+</script>
+
+</body>
+</html>
