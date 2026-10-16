@@ -250,6 +250,18 @@
   }
 
   cycle();
+
+  // Forward slide-nav keys to Marp parent when iframe has focus.
+  window.addEventListener('keydown', (e) => {
+    const nav = ['ArrowRight','ArrowLeft','ArrowUp','ArrowDown',' ','PageDown','PageUp','Home','End'];
+    if (!nav.includes(e.key)) return;
+    try {
+      window.parent.document.dispatchEvent(new KeyboardEvent('keydown', {
+        key: e.key, code: e.code, keyCode: e.keyCode, which: e.keyCode,
+        bubbles: true, cancelable: true
+      }));
+    } catch (err) {}
+  });
 </script>
 
 </body>

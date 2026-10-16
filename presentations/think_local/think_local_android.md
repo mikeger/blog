@@ -345,6 +345,39 @@ section.anim header, section.anim footer { display: none !important; }
 
 </style>
 
+<script>
+// Marp bridge: when a slide becomes active (bespoke-marp-active), postMessage
+// to every iframe inside it so iframe animations can reset and replay.
+// Needed because file:// iframes are cross-origin to the parent, so iframes
+// can't observe parent slide classes directly.
+(function(){
+  if (window.__marpSlideBridge) return;
+  window.__marpSlideBridge = true;
+  function wire() {
+    var slides = document.querySelectorAll('svg.bespoke-marp-slide');
+    if (!slides.length) { setTimeout(wire, 150); return; }
+    slides.forEach(function(slide){
+      if (slide.__wired) return;
+      slide.__wired = true;
+      function broadcast() {
+        slide.querySelectorAll('iframe').forEach(function(f){
+          try { f.contentWindow.postMessage('bespoke:active', '*'); } catch(e) {}
+        });
+      }
+      new MutationObserver(function(){
+        if (slide.classList.contains('bespoke-marp-active')) broadcast();
+      }).observe(slide, { attributes: true, attributeFilter: ['class'] });
+      if (slide.classList.contains('bespoke-marp-active')) broadcast();
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', wire);
+  } else {
+    wire();
+  }
+})();
+</script>
+
 <!-- _class: cover -->
 <!-- _paginate: false -->
 
@@ -359,7 +392,7 @@ KotlinLeeds · 2026
 <!--
 Hey Leeds. My name is Michael Gerasymenko. Thanks for having me.
 
-Honest disclaimer before I start. I am an iOS engineer. I have never shipped an Android app. What I have done over the last six months is research on-device inference on Android, because our team cares about both platforms and someone had to look.
+Honest disclaimer before I start. I am an iOS engineer. I have never shipped an Android app. What I have done over the last seven months is research on-device inference on Android, because our team cares about both platforms and someone had to look.
 
 Think of this as an outsider mapping your territory. I'll share the lay of the land as I found it. If you catch something I got wrong, I want to hear it.
 -->
@@ -368,18 +401,21 @@ Think of this as an outsider mapping your territory. I'll share the lay of the l
 
 # Who am I
 
-- Building mobile apps since **2009** · iOS the whole time
+- Building mobile apps since **2009**
 - Readdle, Wire, CaraCare, Feeld, now ElevenLabs
-- Author of **XcodeSelectiveTesting**
+- OSS tools author (`github.com/mikeger`)
 - On the Mobile team at ElevenLabs, working on **ElevenReader**
-- Six months ago I started researching **on-device inference**, including Android
+- Originally from **Ukraine**, living and working in **Berlin**
+- This year I've started researching **on-device inference**
 
 <!--
 Mobile since 2009. iOS the whole way. Readdle, Wire, CaraCare, Feeld, now ElevenLabs. Also built an open-source test optimisation tool.
 
+Originally from Ukraine, based in Berlin for a few years now. Travelled over to Leeds for this one.
+
 Six months ago at ElevenLabs I started looking at on-device inference. We care about both platforms. I built a research Android app from scratch, probably the first Android app I have ever committed to a repo, to understand the landscape.
 
-So. I spent six months looking at the on-device ML stack on your platform. That is why I'm standing here. Jetpack Compose expertise is not what I bring.
+So. I spent seven months looking at the on-device ML stack on your platform. That is why I'm standing here. Jetpack Compose expertise is not what I bring.
 -->
 
 ---
@@ -388,15 +424,18 @@ So. I spent six months looking at the on-device ML stack on your platform. That 
 
 <div class="label">ELEVENLABS / CONTEXT</div>
 
-# ElevenLabs
+# IIElevenLabs
 
-- The Voice AI · over $600M ARR · valued at $22B
-- 400 → 800 people in six months
-- Mobile team is hiring, also remote
+- The Voice AI
+- Started here seven months ago, company went 400 → 800 people
+- I'm on the Mobile team, working on **ElevenReader**
+- Mobile team is hiring, also remote (currently, ElevenMusic 🎵 )
 - *Opinions are my own*
 
 <!--
-Where I work. ElevenLabs, the voice AI company. Over 600 million ARR. Reportedly valued at twenty-two billion. Doubled headcount in six months.
+Where I work. ElevenLabs, the voice AI company. Over 600 million ARR. Reportedly valued at twenty-two billion. Joined seven months ago and headcount doubled in that time.
+
+I work on ElevenReader. That's where the research team's work ships. Catch me after and I can set you up with a free annual subscription. Small catch: tell me about any bugs.
 
 Mobile team hires both iOS and Android. If what I say today interests you, come find me after.
 
@@ -409,151 +448,10 @@ Opinions here are my own.
 
 <div class="num">Part One</div>
 
-# The Pattern
-
-<!--
-Three short historical stories. They are the reason I think on-device AI matters.
--->
-
----
-
-<!-- _class: chapter -->
-
-<div class="num">Chapter I</div>
-
-# Time
-
----
-
-<!-- _class: story -->
-
-<div class="kicker">BEFORE / Chapter I</div>
-
-# Precise time
-
-<img class="art" src="assets/big-ben.jpg" />
-
-<!--
-Medieval European town. The biggest building has a huge clock on it. Bells ring at specific hours. Someone walks door to door to wake people up. Time was infrastructure. You looked up at the tower. If you could not see it, you did not know.
-
-Peasants, merchants, scholars. Nobody had a way to privately know the exact time.
--->
-
----
-
-<!-- _class: story -->
-
-<div class="kicker">BEFORE / Chapter I</div>
-
-# Sailors got lost at sea
-
-<img class="art" src="assets/sailors.png" />
-
-<!--
-1714. The British Empire is losing ships. Storms were not the reason. Enemies were not the reason. Sailors could not tell where they were.
-
-To know your longitude at sea, you need the exact time back at your home port. No portable clock survived an ocean voyage.
-
-Parliament offers twenty thousand pounds, millions in today's money, to anyone who can solve it.
--->
-
----
-
-<!-- _class: story -->
-
-<div class="kicker">AFTER / Chapter I</div>
-
-# Time moved onto your wrist
-
-<img class="art" src="assets/wristwatch.png" />
-
-<!--
-Harrison spent forty years. A century later, wristwatches were cheap for everyone.
-
-A medieval peasant imagining the future of time would describe a bigger clock tower. Maybe with lights. They would never have imagined a personal pocket watch. The centralised source was what they knew.
--->
-
----
-
-<!-- _class: story -->
-
-<div class="kicker">BEFORE / Chapter II</div>
-
-# You walked to the computer
-
-<img class="art" src="assets/punch-cards.png" />
-
-<!--
-My mother, 1970s. Punch cards. Walked to the university basement. Handed them to an operator. Task ran overnight. Came back the next day. Sometimes to find a single typo.
-
-Computing lived in a room. You visited it. Same shape as the town clock.
--->
-
----
-
-<!-- _class: story -->
-
-<div class="kicker">AFTER / Chapter II</div>
-
-# The computer walked into your pocket
-
-<img class="art" src="assets/iphone-2g.jpg" />
-
-<!--
-Then it moved. First onto desks. Then into pockets. I started building for iPhone in 2009.
-
-When the phone appeared in 2007, nobody predicted Instagram. Nobody predicted Uber. Nobody predicted WhatsApp.
-
-These products appeared because the technology moved to the person.
--->
-
-
----
-
-<!-- _class: big -->
-
-<div class="label">THE PATTERN</div>
-
-<h1>It happens again. <br> It happens faster.</h1>
-
-<!--
-Four hundred years for clocks. Fifty for factory power. Twenty for computers. Fifteen for mobile.
-
-Every wave is faster. Every wave, we underestimated what people would do with the capability once it was personal and private.
--->
-
----
-
-<!-- _class: now -->
-
-<div class="label">RIGHT NOW</div>
-
-# We rent thinking by the token
-
-<div class="body">
-Today, if you want to think with AI, you send your data to someone else's building and pay for the round trip.
-
-<strong>This is the last decade you'll do that.</strong>
-</div>
-
-<!--
-Right now, if you want AI thinking, you send your prompt to a data centre somewhere. You pay for the round trip by the token. Users' voices. Customers' records. Your own ideas.
-
-Soon, "wait, you had to send your data to a server?" will sound as antique as "wait, you had to be home to receive a call?"
-
-Technology will move. Physics, economics, privacy all point the same way. That shift is inevitable.
--->
-
----
-
-<!-- _class: chapter -->
-
-<div class="num">Part Two</div>
-
 # Under the Hood
 
 <!--
-OK. On-device AI is coming. What is a model we are running? Why does it need compiling? Why is the stack different on every platform?
+Before we talk about where this is going, let me show you how it actually works today. What is a model we are running? Why does it need compiling? Why is the stack different on every platform?
 
 Next few minutes, I will demystify it. I am not teaching you ML. Just enough mental model that the terms stop being scary.
 -->
@@ -562,8 +460,8 @@ Next few minutes, I will demystify it. I am not teaching you ML. Just enough men
 
 # A model is a function
 
-```
-function model(input: [float]) -> [float] {
+```kotlin
+fun model(input: FloatArray): FloatArray {
     // billions of multiplications later
     return output
 }
@@ -577,6 +475,64 @@ That is it. No magic.
 TTS: input encodes text, output encodes a waveform. Image classification: input is pixels, output is "seventy-three percent a cat."
 
 The entire intelligence is in the numbers it uses to transform input into output. Those numbers are the weights.
+-->
+
+---
+
+<div class="label">PRIMER</div>
+
+# Vector + matrix
+
+<div class="primer">
+<style>
+.primer { display: flex; align-items: flex-start; justify-content: center; gap: 90px; margin-top: 50px; }
+.primer .box { display: flex; flex-direction: column; align-items: center; }
+.primer .cap { font-size: 15px; font-weight: 700; letter-spacing: 2px; color: #999; text-transform: uppercase; margin-bottom: 18px; }
+.primer .vector-grid { display: grid; grid-template-columns: 70px; grid-template-rows: repeat(4, 70px); gap: 6px; }
+.primer .matrix-wrap { display: grid; grid-template-columns: 36px 1fr; grid-template-rows: 36px 1fr; gap: 10px; }
+.primer .matrix-grid { display: grid; grid-template-columns: repeat(4, 70px); grid-template-rows: repeat(3, 70px); gap: 6px; }
+.primer .cell { display: flex; align-items: center; justify-content: center; border: 1.5px solid #BBB; border-radius: 6px; color: #333; font-size: 22px; font-weight: 500; background: #FFF; }
+.primer .row-labels { display: grid; grid-template-rows: repeat(3, 70px); gap: 6px; align-items: center; font-size: 12px; font-weight: 700; color: #999; text-align: right; padding-right: 4px; letter-spacing: 1px; }
+.primer .col-labels { display: grid; grid-template-columns: repeat(4, 70px); gap: 6px; justify-items: center; font-size: 12px; font-weight: 700; color: #999; letter-spacing: 1px; }
+.primer .corner { }
+.primer .shape { font-size: 13px; color: #AAA; margin-top: 14px; font-weight: 500; letter-spacing: 1px; }
+</style>
+
+<div class="box">
+  <div class="cap">Vector</div>
+  <div class="vector-grid">
+    <div class="cell">x₁</div>
+    <div class="cell">x₂</div>
+    <div class="cell">x₃</div>
+    <div class="cell">x₄</div>
+  </div>
+  <div class="shape">ordered list · 4 numbers</div>
+</div>
+
+<div class="box">
+  <div class="cap">Matrix</div>
+  <div class="matrix-wrap">
+    <div class="corner"></div>
+    <div class="col-labels"><span>col 1</span><span>col 2</span><span>col 3</span><span>col 4</span></div>
+    <div class="row-labels"><span>row 1</span><span>row 2</span><span>row 3</span></div>
+    <div class="matrix-grid">
+      <div class="cell">w</div><div class="cell">w</div><div class="cell">w</div><div class="cell">w</div>
+      <div class="cell">w</div><div class="cell">w</div><div class="cell">w</div><div class="cell">w</div>
+      <div class="cell">w</div><div class="cell">w</div><div class="cell">w</div><div class="cell">w</div>
+    </div>
+  </div>
+  <div class="shape">grid · 3 rows × 4 columns</div>
+</div>
+</div>
+
+
+
+<!--
+Twenty seconds of maths, for anyone who last saw this in school.
+
+A vector is an ordered list of numbers. A matrix is a grid of numbers, laid out in rows and columns. The weights of a model live in matrices like this.
+
+The operation inside every ML model: multiply a vector by a matrix, get a vector back. Then do it a few billion more times.
 -->
 
 ---
@@ -691,34 +647,6 @@ On iOS, Core ML compiles on-device at first launch. On Android, especially for N
 One source model, four target formats, four pieces of silicon. On Android alone you cross three of these. Each conversion has its own op coverage, its own quantization story, its own debugging tools. This is what fragmentation looks like.
 -->
 
----
-
-# Why one model file won't run everywhere
-
-- Apple ANE ≠ Qualcomm Hexagon ≠ Mediatek APU ≠ Google Tensor ≠ Samsung ENN
-- Each needs the model **compiled for it**
-- Different formats: `.mlpackage`, `.aimodel`, `.tflite`, `.pte`, `.onnx`
-- Different quantization support
-- Different op coverage
-
-<!--
-Critical point. The compiled model for an iPhone is nothing like the compiled model for an Android phone. On Android alone, you cross four different vendors.
-
-Each has its own instruction set, its own op coverage, its own quirks. The shippable artefact is usually a model in a portable format that gets re-compiled on each device at install or first launch.
-
-Some chipset vendors offer their own SDK with pre-compiled models. Others expect you to use a cross-platform runtime. There is no "one model binary everywhere." That fragmentation is one of the real costs of on-device AI.
--->
-
----
-
-<!-- _class: demo -->
-
-# Here is one running.
-
-<div class="cue">Pre-recorded · Galaxy S25 · Hexagon NPU · airplane mode</div>
-
-<div class="credit"><strong>Model:</strong> ElevenLabs Research team · <strong>Android integration:</strong> Franek Mirkowski</div>
-
 <!--
 [Play the recording. Thirty seconds. Narrate briefly what the audience is seeing.]
 
@@ -735,137 +663,56 @@ STAGE NOTES:
 
 <!-- _class: chapter -->
 
-<div class="num">Part Three</div>
+<div class="num">Part Two</div>
 
-# Android
+# Lessons
 
 <!--
-I built a research app. Goal: run text-to-speech on-device, Android, Hexagon NPU as the fast path.
+Six months on this at ElevenLabs. Six lessons that apply the same way on both iOS and Android. Android specifics come after.
 
-What follows is what I did. One path through the landscape. The right way to do this on Android is still an open question for me.
-
-The thing you just heard was running on Snapdragon via QNN. The same approach I am about to walk you through.
+Disclaimer. Our model internals stay inside the company. The integration story is fair game. Stack, pipeline, pitfalls.
 -->
 
 ---
 
-<div class="label">THE LANDSCAPE</div>
+<div class="label">LESSON 1 · DISPATCH</div>
 
-# Pick your runtime
+# Dispatch is a planner decision, not a contract
 
-<div class="two-col">
-<div>
-<h3>LiteRT (ex TFLite)</h3>
-<p>Google's recommended path. GPU delegate. NNAPI is deprecated.</p>
-</div>
-<div>
-<h3>ONNX Runtime Mobile</h3>
-<p>Cross-platform. Growing NPU support. Microsoft-driven.</p>
-</div>
-</div>
-
-<div class="two-col">
-<div>
-<h3>MediaPipe / AICore</h3>
-<p>Google's high-level APIs. Gemini Nano on Pixel. Opinionated.</p>
-</div>
-<div>
-<h3>ExecuTorch</h3>
-<p>PyTorch's mobile runtime. Clean export from training. What I used.</p>
-</div>
-</div>
+- You request a compute unit
+- The runtime decides placement
+- You might ask for the NPU and get the CPU
+- **Measure actual placement with a profiler. There is no code API for it.**
 
 <!--
-Four main choices today.
+Lesson one. The dispatch hint is just a hint.
 
-LiteRT, formerly TensorFlow Lite, is Google's recommended path. Mature on CPU and GPU. NNAPI was deprecated in Android 15, so you now reach NPUs through vendor delegates.
+Set computeUnits to cpuAndNeuralEngine on iOS. You are offering the system a budget. It runs its own cost model and picks what it thinks is best. On iPhone 15 we repeatedly saw Core ML's CPU int8 path beat the Core AI GPU path for our workload. Eight years of hand-tuned NEON and AMX kernels is a hard baseline to clear.
 
-ONNX Runtime Mobile. Microsoft's play. Cross-platform. Growing NPU support.
+Android does the same thing. You hand a graph to the NPU delegate, it silently falls back to CPU for ops the NPU does not support.
 
-MediaPipe LLM Inference and AICore. Google's higher-level APIs. Gemini Nano on Pixel. Opinionated, limited.
-
-ExecuTorch. PyTorch's mobile runtime. If your model trains in PyTorch, the export path is cleaner. That is why I used it.
-
-For my case, a PyTorch model we needed on both iOS and Android, ExecuTorch was pragmatic. Your situation might favour LiteRT or ONNX.
+"Did the NPU run my model" is a question you answer with Instruments or perfetto, not with code. There is no why-not-the-NPU tool today.
 -->
 
 ---
 
-<div class="label">OUR RESEARCH SETUP</div>
+<div class="label">LESSON 2 · SHAPES</div>
 
-# ExecuTorch + two backends
+# NPUs demand static shapes
 
-<div class="two-col">
-<div>
-<h3>XNNPACK (CPU)</h3>
-<p>Default. Works on any arm64. The baseline I always have.</p>
-</div>
-<div>
-<h3>Qualcomm QNN / HTP</h3>
-<p>Hexagon NPU via Qualcomm AI Engine Direct SDK. Only Qualcomm chips.</p>
-</div>
-</div>
-
-<p style="margin-top: 30px; max-width: 60ch;">The CPU path is a universal fallback. The NPU path is where the speed is, and where the pain is.</p>
+- NPUs plan memory and shaders at compile time
+- Dynamic input shapes trigger a recompile. Every. Call.
+- Seconds to tens of seconds on older silicon. On Qualcomm QNN, the compiler refuses outright.
+- **Fix: pad inputs to a small set of fixed bucket sizes.**
 
 <!--
-Two backends under ExecuTorch in the research app.
+Lesson two. NPUs need static shapes.
 
-XNNPACK. Google's optimised CPU float kernels, callable from ExecuTorch. Works on every arm64 Android device. My safety net.
+Dynamic shapes feel innocent in Python. On device they are brutal. Every new input shape triggers a recompile. On the Apple A16 chip that is five to twenty seconds. On Qualcomm QNN the compiler refuses dynamic shapes outright.
 
-Qualcomm's QNN SDK, which drives the Hexagon NPU inside Snapdragons. Only Qualcomm chips. On my target device, a Galaxy S25 with Snapdragon 8 Elite, this is where the speed lives.
+Second cost. The Apple GPU has a hard ceiling of thirty-two Metal residency sets. One per unique shape. Hit thirty-three, start evicting. On Android, each pad bucket ships as a separate compiled artefact in the APK.
 
-Nothing for Samsung ENN, MediaTek APU, or Google Tensor in my repo. Each would be a separate SDK integration. I did not do them.
--->
-
----
-
-<div class="label">COMPILATION</div>
-
-# AOT on the host, per SoC
-
-- Export happens **on your Linux build server**. No on-device compile.
-- One `.pte` file per **(model, SoC generation)** combination
-- Hexagon architecture mapping is hand-maintained:
-  - `SM8450 → v69`, `SM8550 → v73`, `SM8650 → v75`, `SM8750 → v79`
-- Unknown SoC = build error
-- *QNN host tooling only runs on Linux x86_64*
-
-<!--
-The build pipeline is different from iOS. There, Core ML compiles on-device at first launch. For QNN, I compile ahead-of-time on a Linux x86_64 build server, per Qualcomm SoC generation. Each architecture version (v69, v73, v75, v79) gets its own dot pte file.
-
-The mapping between SoC model and Hexagon architecture is hand-maintained. New Snapdragon ships, you add a line to a Gradle file. Unknown SoC, the build throws.
-
-I run this on GitHub Actions, because the QNN host toolchain is Linux x86_64. My Mac cannot build it. Which means Android developers who want to try this need a Linux box or CI.
--->
-
----
-
-<div class="label">SHAPES</div>
-
-# Tensor shapes: static vs dynamic
-
-A tensor "shape" is its dimensions. Something like `[1, 128, 512]`.
-
-<div class="two-col">
-<div>
-<h3>Static shape</h3>
-<p>All dimensions known at compile time. Memory layout is fixed.</p>
-</div>
-<div>
-<h3>Dynamic shape</h3>
-<p>One or more dimensions decided at runtime. Flexible, costly.</p>
-</div>
-</div>
-
-<p style="margin-top: 30px; max-width: 60ch;">GPUs and NPUs plan memory and shaders ahead of time. They prefer static.</p>
-
-<!--
-One concept before the trap. A tensor is a multi-dimensional array. Its shape is its dimensions. Something like one by one hundred and twenty-eight by five hundred and twelve.
-
-Static shape: every dimension is known when the model is compiled. Dynamic shape: some dimension is only decided at runtime, when the actual input arrives.
-
-Hardware accelerators plan memory layout and shader programs ahead of time, based on the shapes they expect. Shapes change, they replan.
+Fix is the same on both platforms. Pad inputs to a small set of fixed bucket sizes. One compiled artefact per bucket. Waste some compute on padding. Still the right call.
 -->
 
 ---
@@ -875,63 +722,193 @@ Hardware accelerators plan memory layout and shader programs ahead of time, base
 <iframe src="assets/anim/static-vs-dynamic.html"></iframe>
 
 <!--
-Both rows run ten inferences. Top row has a static shape. Model compiles once, every inference is cheap. Bottom row has a dynamic shape. Every new input triggers a recompile. Static finishes while dynamic is still working.
+Both rows run ten inferences. Top: static shape, model compiles once, every inference is cheap. Bottom: dynamic shape, every new input triggers a recompile. Static finishes while dynamic is still working.
 -->
 
 ---
 
-<div class="label">STATIC SHAPES</div>
+<div class="label">LESSON 3 · FIRST LAUNCH</div>
 
-# NPUs want static shapes. Period.
+# Cold compile is a UX event
 
-- QNN won't accept dynamic shapes at all
-- Workaround: compile multiple `.pte` files, one per **pad bucket**
-- Runtime picks the smallest bucket that fits
-- Input exceeds biggest bucket → hard failure
+- Portable model file → native code happens on first load
+- Minutes on older silicon. Tens of seconds on new.
+- Cached per device, per OS version
+- **Pre-warm, or ship pre-compiled artefacts**
+
 
 <!--
-NPUs plan memory ahead. They need every tensor shape at compile time. In PyTorch terms, dynamic_shapes equals None is enforced for QNN.
+Lesson three. First-launch compile is a UX event.
 
-The workaround: compile the same logical model N times, each with a different input length, and ship all N artefacts. At runtime, pick the smallest dot pte that fits the current input.
+The first time a model loads on a device, the runtime compiles it to native code for that chip. Simple classifier, fast. Serious multi-stage pipeline, less so.
 
-If the input exceeds the biggest bucket, you fail. You either reject the input, or re-compile at install time with a bigger bucket.
+On iPhone 17 Pro we saw about sixty seconds for one of our pipelines. On iPhone 15, several minutes. Older devices, worse.
 
-That is the shape of the compromise. Multiple compiled artefacts and a runtime selector.
+Cache saves subsequent launches. First time, you need UI. "Preparing." Make it a feature.
+
+Long-term fix. Compile ahead of time, during your app build, on CI. Apple ships `xcrun coreai-build compile` for this. On Android, QNN forces the AOT path anyway. We are moving towards that on iOS.
 -->
 
 ---
 
-<div class="label">FIRST-RUN COST</div>
+<div class="label">LESSON 4 · MEMORY</div>
 
-# Warm-up is real
+# Peak memory kills more models than latency
 
-- "First 1–4 inferences are slower. Let it warm up."
-- NPU memory planner lazy-initializes
-- DSP skel libraries lazy-load
-- *Build warm-up into your UX.*
+- Hybrid pipeline + fallback peaks **~1.4 GB** on a 6 GB device
+- One variant was retired after OOMing at a **3 GB** watermark during setup
+- On low-RAM devices, split sub-models across CPU and NPU
+- *Memory warnings fire. We don't unload mid-session.*
 
 <!--
-NPUs have warm-up. The compiler-managed memory, the DSP skel libraries, the cache priming all cost on the first inference, less on the second, less on the third. By the fourth, you are at steady state.
+Lesson four. Memory kills more models than latency does.
 
-This is universal across every NPU I looked at. Google Tensor warms up. Hexagon warms up. ANE warms up.
+iPhone 15 is a six gigabyte device. Our hybrid pipeline plus a fallback peaks at about 1.4 gigabytes during setup. One variant OOMed at a three gigabyte watermark during specialisation. We retired it.
 
-If your app has latency-sensitive first use (say the word, hear the voice back) you need to warm up in the background before the user asks.
+On devices with four and a half gigs of RAM or less, we route some pieces to CPU only to bound the NPU residency footprint. Worse latency, lower memory. Trade-off made.
+
+We hook memory warnings. We do not unload mid-session. Reload is worse than the pressure. Pick your poison.
 -->
 
 ---
 
-<div class="label">THE PLUMBING</div>
+<div class="label">LESSON 5 · PERF HYGIENE</div>
+
+# Three things that silently cost you 30%
+
+- **Debug builds.** Release is ~1.3× faster. Always benchmark Release.
+- **File I/O in the hot path.** Even logging kills throughput. 30% in our case.
+- **Diagnostic loops left behind.** A `minV/maxV/meanV` sanity check cost us 2× for a week.
+
+<!--
+Lesson five. Three universal perf traps.
+
+Always benchmark Release. Debug is one-point-three times slower for inference. You will chase phantom regressions in Debug.
+
+Never do file I/O in the inference hot path. Diagnostic file writes, thirty-nine per synthesis, cost us thirty percent throughput. Removed them. Got it back.
+
+Discipline one. If you add a debug min, max, mean loop over the output tensor to sanity-check, remember to remove it. Mine cost two times for a week.
+
+These are embarrassing but universal.
+-->
+
+---
+
+<div class="label">LESSON 6 · THERMAL</div>
+
+# The phone gets hot
+## Sustained inference is a different workload
+
+- Cold-phone benchmarks are the best case, not the common case
+- ANE and Hexagon both clock down once skin temperature climbs
+- Latency can double a minute into a long session
+- Measure warm. Record device temperature next to your numbers.
+
+<!--
+Lesson six. Thermal.
+
+Easy trap. You benchmark at your desk, the phone is cool, numbers look great. User runs it for two minutes in a warm pocket and latency doubles. Both Apple silicon and Qualcomm throttle aggressively once skin temperature crosses roughly forty Celsius. The NPU is often the first to clock down because fixed-function silicon runs hot per square millimetre.
+
+Rule we use. Always profile after at least sixty seconds of sustained load. Record skin temperature next to your numbers. A benchmark without a temperature reading is a marketing claim.
+-->
+
+---
+
+<img src="assets/fridge.jpg" width=450>
+
+---
+
+<!-- _class: chapter -->
+
+<div class="num">Part Three</div>
+
+# Android specifics
+
+<!--
+Three things that are Android-only, from the research app.
+-->
+
+---
+
+<div class="label">ANDROID · RUNTIMES</div>
+
+# The runtime landscape
+
+<div class="two-col">
+<div>
+<h3>LiteRT (ex TFLite)</h3>
+<p>Google's recommended path. GPU delegate. NNAPI is deprecated.</p>
+</div>
+<div>
+<h3>ExecuTorch</h3>
+<p>PyTorch's mobile runtime. Clean export. <strong>What we tried.</strong></p>
+</div>
+</div>
+
+<div class="two-col">
+<div>
+<h3>ONNX Runtime Mobile</h3>
+<p>Cross-platform. Growing NPU support. Microsoft-driven.</p>
+</div>
+<div>
+<h3>MediaPipe / AICore</h3>
+<p>Google's high-level APIs. Gemini Nano on Pixel. Opinionated.</p>
+</div>
+</div>
+
+
+<!--
+Four main choices today.
+
+LiteRT, formerly TensorFlow Lite, is Google's recommended path. Mature on CPU and GPU. NNAPI was deprecated in Android 15, so you reach NPUs through vendor delegates now.
+
+ExecuTorch, PyTorch's mobile runtime. If your model trains in PyTorch, the export path is cleaner. That is why I used it.
+
+ONNX Runtime Mobile. Microsoft's cross-platform play. Growing NPU support.
+
+MediaPipe LLM Inference and AICore. Google's higher-level APIs. Gemini Nano on Pixel. Opinionated, limited.
+
+For our research setup, a PyTorch model we wanted on both platforms, ExecuTorch was pragmatic. Your situation might favour LiteRT or ONNX.
+-->
+
+---
+
+<div class="label">ANDROID · BUILD-TIME FRAGMENTATION</div>
+
+# One APK, many compiled artefacts
+
+- Hexagon NPU: one `.pte` file **per Snapdragon generation**
+- Hand-maintained mapping: `SM8450 → v69 · SM8550 → v73 · SM8650 → v75 · SM8750 → v79`
+- Unknown SoC = build error
+- QNN host toolchain is **Linux x86_64 only** → everything through CI
+- Multiple `.pte` ship in the APK. Runtime picks the right one.
+
+<!--
+Android-specific lesson one. Fragmentation happens at build time.
+
+For QNN, the pipeline compiles ahead-of-time on a Linux x86_64 build server, per Qualcomm SoC generation. Each architecture version (v69, v73, v75, v79) gets its own dot pte file.
+
+Hexagon arch mapping to Snapdragon generation is hand-maintained. New Snapdragon ships, you add a line to a Gradle file. Unknown SoC, the build throws.
+
+The QNN host toolchain is Linux x86 only. My Mac cannot build it. Android developers who want to try this need a Linux box or CI.
+
+One APK ships multiple dot pte artefacts and picks the right one at runtime. Standard pattern for anything hitting a vendor NPU on Android.
+-->
+
+---
+
+<div class="label">ANDROID · THE PLUMBING TAX</div>
 
 # What you don't think about until it bites
 
 - Hexagon DSP libraries must **not be stripped**. Loader fails.
-- `useLegacyPackaging = true` for jniLibs
-- Set `ADSP_LIBRARY_PATH` + `LD_LIBRARY_PATH` *before* backend `dlopen`
-- `<uses-native-library android:name="libcdsprpc.so" .../>`
+- `useLegacyPackaging = true` for jniLibs (extracted, not compressed)
+- Set `ADSP_LIBRARY_PATH` + `LD_LIBRARY_PATH` **before** backend `dlopen`
+- `<uses-native-library android:name="libcdsprpc.so"/>` in manifest
 - Pin NDK, pin CMake. Version drift breaks the native build.
 
 <!--
-Then there is the plumbing. The stuff that does not show up until the APK crashes on launch.
+Android-specific lesson two. The plumbing. Stuff that does not show up until the APK crashes on launch.
 
 Hexagon DSP libraries ship un-stripped. The DSP loader needs debug symbols. Strip them, it refuses to load.
 
@@ -943,7 +920,7 @@ Manifest needs the uses-native-library declaration for libcdsprpc.so.
 
 NDK pinned to 28.2, CMake pinned to 3.31.6. Version drift breaks everything.
 
-Six different gotchas before you have run a single inference. This is the Android ML tax.
+Six different gotchas Franek walked into before the first inference ran. The Android ML tax.
 -->
 
 ---
@@ -955,7 +932,126 @@ Six different gotchas before you have run a single inference. This is the Androi
 # The Frontier
 
 <!--
-Final section. Where this all goes next.
+Honest tour done. Before we close, where this all goes next, and why I think it goes anywhere at all. Three short historical stories first. They are the reason I think on-device AI matters.
+-->
+
+---
+
+<!-- _class: chapter -->
+
+<div class="num">Chapter I</div>
+
+# Time
+
+---
+
+<!-- _class: story -->
+
+<div class="kicker">BEFORE / Chapter I</div>
+
+# Precise time
+
+<img class="art" src="assets/big-ben.jpg" />
+
+<!--
+Medieval European town. The biggest building has a huge clock on it. Bells ring at specific hours. Someone walks door to door to wake people up. Time was infrastructure. You looked up at the tower. If you could not see it, you did not know.
+
+Peasants, merchants, scholars. Nobody had a way to privately know the exact time.
+-->
+
+---
+
+<!-- _class: story -->
+
+<div class="kicker">AFTER / Chapter I</div>
+
+# Time moved onto your wrist
+
+<img class="art" src="assets/wristwatch.png" />
+
+<!--
+Harrison spent forty years building a chronometer that worked at sea. A century later, wristwatches were cheap for everyone.
+
+A medieval peasant imagining the future of time would describe a bigger clock tower. Maybe with lights. They would never have imagined a personal pocket watch. The centralised source was what they knew.
+-->
+
+---
+
+<!-- _class: chapter -->
+
+<div class="num">Chapter II</div>
+
+# Computer Time
+
+---
+
+<!-- _class: story -->
+
+<div class="kicker">BEFORE / Chapter II</div>
+
+# You walked to the computer
+
+<img class="art" src="assets/punch-cards.png" />
+
+<!--
+My mother, 1970s. Punch cards. Walked to the university basement. Handed them to an operator. Task ran overnight. Came back the next day. Sometimes to find a single typo.
+
+Computing lived in a room. You visited it. Same shape as the town clock.
+-->
+
+---
+
+<!-- _class: story -->
+
+<div class="kicker">AFTER / Chapter II</div>
+
+# The computer walked into your pocket
+
+<img class="art" src="assets/iphone-2g.jpg" />
+
+<!--
+Then it moved. First onto desks. Then into pockets. I started building for iPhone in 2009.
+
+When the phone appeared in 2007, nobody predicted Instagram. Nobody predicted Uber. Nobody predicted WhatsApp.
+
+These products appeared because the technology moved to the person.
+-->
+
+
+---
+
+<!-- _class: big -->
+
+<div class="label">THE PATTERN</div>
+
+<h1>It happens again. <br> It happens faster.</h1>
+
+<!--
+Four hundred years for clocks. Fifty for factory power. Twenty for computers. Fifteen for mobile.
+
+Every wave is faster. Every wave, we underestimated what people would do with the capability once it was personal and private.
+-->
+
+---
+
+<!-- _class: now -->
+
+<div class="label">RIGHT NOW</div>
+
+# We rent thinking by the token
+
+<div class="body">
+Today, if you want to think with AI, you send your data to someone else's building and pay for the round trip.
+
+<strong>This is the last decade you'll do that.</strong>
+</div>
+
+<!--
+Right now, if you want AI thinking, you send your prompt to a data centre somewhere. You pay for the round trip by the token. Users' voices. Customers' records. Your own ideas.
+
+Soon, "wait, you had to send your data to a server?" will sound as antique as "wait, you had to be home to receive a call?"
+
+Technology will move. Physics, economics, privacy all point the same way. That shift is inevitable. Four pieces to the puzzle.
 -->
 
 ---
@@ -987,7 +1083,7 @@ Piece two: memory bandwidth. The harder constraint for LLM inference. Both platf
 <iframe src="assets/anim/path-to-gpt4.html#3"></iframe>
 
 <!--
-Piece three: software. Four model-side techniques compound. Int4. Mixture of experts. Partial loading from flash. Distillation.
+Piece three: software. Five model-side techniques compound. Int4 quantization. Mixture of experts. Partial loading from flash. Distillation. Sparsity. Stacked together, ten to fifty times effective capacity on the same hardware.
 -->
 
 ---
@@ -1004,8 +1100,6 @@ Stack it all. GPT-4 class on a flagship phone, airplane mode, by 2028. Both iPho
 
 # Security is the real blocker
 
-The model file is the asset. A trained model represents millions of dollars of compute, proprietary data, and years of research. Protecting it on an untrusted device is an unsolved problem.
-
 <!--
 Six months ago I thought the hard problem was performance. It is not. Performance is a solvable engineering problem. The hard problem is protecting the model from the device it runs on.
 
@@ -1016,10 +1110,10 @@ For a company whose moat is its model, this is existential. For an open-source m
 
 <div class="label">THE THREAT MODEL</div>
 
-# What an attacker with a device can do
+# What an attacker can do
 
-- Pull the model file out of app storage, over USB or ADB
-- Hook the inference call with Frida or LLDB
+- Pull the model file out of app storage via ADB
+- Hook the inference call with a debugger
 - Dump decrypted weights from process memory
 - Replay or clone the model on their own hardware
 - *Encryption at rest does nothing. The model has to decrypt to run.*
@@ -1083,7 +1177,7 @@ Stacked together, this is what a serious on-device deployment looks like today.
 - No developer-accessible trusted execution environment large enough for a model
 - No hardware memory encryption that excludes a root-level reader on a rooted device
 - No attested execution that binds (model hash, program hash, device identity) to a third-party key release
-- *This is why high-value proprietary models still live in the cloud.*
+- This is why high-value proprietary models still live in the cloud.
 
 <!--
 Where the stack breaks down is at the last mile. Even with Play Integrity, model encryption, StrongBox key wrapping, there is a moment during inference when the decrypted weights sit in GPU or NPU memory. A root-level process on a rooted device can read that memory.
@@ -1108,6 +1202,31 @@ You do not need your own model on-device to build a great product. Open models (
 The IP is in the product you build around the model. The UX. The integration with the user's device. The agentic logic.
 
 That is the design space that opens up when thinking shifts to the edge.
+-->
+
+---
+
+<div class="label">WHERE THE WORLD IS HEADING</div>
+
+# Models are becoming commodity
+
+- Swap one frontier model for another. Most apps barely notice.
+- I moved from Opus to Grok 4.6 fast last week. Didn't feel it.
+- Three years ago we used GPT-3.5 directly. Soon nobody will.
+- You cannot make a model smarter if the training data isn't.
+- **Fine-tuned products eat raw models.**
+
+
+<!--
+Where I think the world is heading.
+
+Models are becoming commodity. Last week I moved my daily coding workflow from Opus to Grok 4.6 fast. The difference was marginal. Three years ago we were all talking to GPT-3.5 directly, through a text box. Soon nobody will. The raw model is becoming infrastructure, not a product.
+
+There is a ceiling on how smart a model can get if the training data does not get smarter. We are approaching that ceiling with internet-scale text. The next decade of value is not in better models, it is in better products built on commodity models.
+
+Concrete example. The app I work on, ElevenReader, uses ElevenLabs TTS. In principle the TTS could be swapped for Kokoro or Piper or whatever ships next month. The product is not the TTS. It is the reading experience. The library. The voice selection. The way it handles long-form content. The UX.
+
+Build products, not model wrappers.
 -->
 
 ---

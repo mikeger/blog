@@ -92,8 +92,8 @@
     stroke: var(--branch);
     stroke-width: 2;
     fill: none;
-    stroke-dasharray: 400;
-    stroke-dashoffset: 400;
+    stroke-dasharray: 1 1;
+    stroke-dashoffset: 1;
     transition: stroke-dashoffset 0.8s ease, stroke 0.4s ease;
   }
 
@@ -239,11 +239,11 @@
   </div>
 
   <svg class="svg-layer" viewBox="0 0 1200 600" preserveAspectRatio="none">
-    <!-- Lines from source center (600, 180) to each format box top (col+100, 260) -->
-    <path class="path-line" id="line-0" d="M 600 180 Q 600 220 260 260"></path>
-    <path class="path-line" id="line-1" d="M 600 180 Q 600 220 520 260"></path>
-    <path class="path-line" id="line-2" d="M 600 180 Q 600 220 780 260"></path>
-    <path class="path-line" id="line-3" d="M 600 180 Q 600 220 1040 260"></path>
+    <!-- Endpoints are recomputed from actual DOM positions in script below -->
+    <path class="path-line" pathLength="1" id="line-0" d="M 600 180 L 160 260"></path>
+    <path class="path-line" pathLength="1" id="line-1" d="M 600 180 L 420 260"></path>
+    <path class="path-line" pathLength="1" id="line-2" d="M 600 180 L 680 260"></path>
+    <path class="path-line" pathLength="1" id="line-3" d="M 600 180 L 940 260"></path>
   </svg>
 
   <div class="format col-0" id="fmt-0">
@@ -295,16 +295,42 @@
 </div>
 
 <script>
+  const svg = document.querySelector('.svg-layer');
+  const stage = document.querySelector('.stage');
+  const source = document.querySelector('.source');
   const lines = document.querySelectorAll('.path-line');
   const formats = document.querySelectorAll('.format');
   const targets = document.querySelectorAll('.target');
 
   function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-  async function animate() {
-    await sleep(500);
+  // Point SVG viewBox at the actual stage pixel size so line coords and box
+  // coords share one coordinate system. Then compute each line from the actual
+  // source and format DOM positions.
+  function updateLines() {
+    const stageRect = stage.getBoundingClientRect();
+    if (stageRect.width === 0 || stageRect.height === 0) return;
+    svg.setAttribute('viewBox', `0 0 ${stageRect.width} ${stageRect.height}`);
+    const sourceRect = source.getBoundingClientRect();
+    const sx = sourceRect.left + sourceRect.width / 2 - stageRect.left;
+    const sy = sourceRect.bottom - stageRect.top;
+    formats.forEach((fmt, i) => {
+      const r = fmt.getBoundingClientRect();
+      const fx = r.left + r.width / 2 - stageRect.left;
+      const fy = r.top - stageRect.top;
+      const midY = sy + (fy - sy) * 0.55;
+      lines[i].setAttribute('d', `M ${sx} ${sy} Q ${sx} ${midY} ${fx} ${fy}`);
+    });
+  }
 
-    // Build each branch in sequence, then hold
+  function reset() {
+    lines.forEach(l => l.classList.remove('on'));
+    formats.forEach(f => f.classList.remove('on'));
+    targets.forEach(t => t.classList.remove('on'));
+  }
+
+  async function animate() {
+    await sleep(400);
     for (let i = 0; i < 4; i++) {
       lines[i].classList.add('on');
       await sleep(500);
@@ -315,7 +341,76 @@
     }
   }
 
-  animate();
+  // --- Visibility-aware playback (bespoke.js aware) ---
+  // Marp's bespoke runtime toggles `bespoke-marp-active` on the parent slide
+  // <svg> element. We watch that class so the animation replays whenever the
+  // user navigates to this slide (and fires correctly the first time too).
+  let running = false;
+  let wasActive = false;
+  function run() {
+    if (running) return;
+    running = true;
+    reset();
+    updateLines();
+    animate().then(() => { running = false; });
+  }
+  function checkActive() {
+    // If the parent frame is cross-origin (file:// in Chrome), we can't read
+    // its DOM. Return null here — the bridge script's postMessage path will
+    // trigger the animation instead. Firing on load would make the animation
+    // play before the user ever reaches the slide.
+    let slide = null;
+    try {
+      if (window.frameElement && window.frameElement.closest) {
+        slide = window.frameElement.closest('svg.bespoke-marp-slide');
+      }
+    } catch (e) { slide = null; }
+    if (!slide) return null;
+    const isActive = slide.classList.contains('bespoke-marp-active');
+    if (isActive && !wasActive) run();
+    wasActive = isActive;
+    return slide;
+  }
+
+  // --- Keyboard passthrough ---
+  // When the iframe has focus, arrow / space / PgUp / PgDn get swallowed and
+  // Marp can't advance. Forward them back to the parent document.
+  window.addEventListener('keydown', (e) => {
+    const nav = ['ArrowRight','ArrowLeft','ArrowUp','ArrowDown',' ','PageDown','PageUp','Home','End'];
+    if (!nav.includes(e.key)) return;
+    try {
+      const evt = new KeyboardEvent('keydown', {
+        key: e.key, code: e.code, keyCode: e.keyCode, which: e.keyCode,
+        bubbles: true, cancelable: true
+      });
+      window.parent.document.dispatchEvent(evt);
+    } catch (err) {}
+  });
+
+  window.addEventListener('resize', updateLines);
+  window.addEventListener('load', () => {
+    updateLines();
+    const slide = checkActive();
+    if (slide) {
+      try {
+        const MO = window.parent.MutationObserver || MutationObserver;
+        new MO(checkActive).observe(slide, { attributes: true, attributeFilter: ['class'] });
+      } catch (e) {
+        setInterval(checkActive, 250);
+      }
+    }
+  });
+
+  // Primary path for file:// cross-origin: receive postMessage from the deck's
+  // bridge script (in the markdown's top-level <script>) when this slide
+  // becomes the active Marp slide.
+  window.addEventListener('message', (e) => {
+    if (e.data === 'bespoke:active') {
+      wasActive = false;
+      updateLines();
+      run();
+    }
+  });
 </script>
 
 </body>

@@ -108,7 +108,6 @@ section::before {
 }
 
 section.cover::before,
-section.company::before,
 section.close::before {
   content: "IIElevenLabs";
 }
@@ -319,7 +318,7 @@ section.close {
   background-repeat: no-repeat;
   background-position: center top;
   background-size: 100% 45%;
-  padding-top: 48vh;
+  padding-top: 34vh;
 }
 
 section.close h2 {
@@ -432,20 +431,187 @@ section.anim header, section.anim footer { display: none !important; }
 .two-col > div h3 { color: #111; }
 .two-col p { font-size: 20px; max-width: none; margin-top: 8px; }
 
+/* ===== Pre-start notice (headphones + channel) ===== */
+section.notice {
+  background: #050505;
+  color: #FFFFFF;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+section.notice::before, section.notice::after { content: ""; }
+section.notice header, section.notice footer { display: none !important; }
+section.notice h1 {
+  font-size: 150px;
+  line-height: 1;
+  letter-spacing: -3px;
+  margin: 0 0 40px 0;
+  color: #FFFFFF;
+}
+section.notice h2 {
+  font-size: 72px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  margin: 0 0 60px 0;
+  color: #FFD12A;
+}
+section.notice .ch-badge {
+  display: inline-block;
+  padding: 12px 28px;
+  background: #FFD12A;
+  color: #050505;
+  font-size: 44px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  border-radius: 12px;
+  margin-top: 16px;
+}
+section.notice p {
+  font-size: 20px;
+  color: #999;
+  margin-top: 40px;
+  letter-spacing: 1px;
+  font-weight: 500;
+  text-align: center;
+  max-width: none;
+}
+
+/* ===== Elevator doors with parallax (3 vertical sections per side) ===== */
+.elevator-doors {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  display: flex;
+  overflow: hidden;
+}
+.elevator-doors .door {
+  flex: 1;
+  display: flex;
+  position: relative;
+}
+.elevator-doors .door.left { flex-direction: row; }
+.elevator-doors .door.right { flex-direction: row; }
+
+.elevator-doors .panel {
+  flex: 1;
+  background: linear-gradient(135deg, #8a8a8a 0%, #5a5a5a 50%, #747474 100%);
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.4);
+  border-right: 2px solid #3a3a3a;
+  position: relative;
+  animation-fill-mode: forwards;
+  animation-delay: 1.3s;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+}
+.elevator-doors .panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.07), transparent 15%, transparent 85%, rgba(0,0,0,0.15));
+}
+
+/* Telescoping: all panels start together, same duration, but DIFFERENT distances.
+   Inner panel travels furthest (3× its width), middle 2×, outer 1×.
+   Inner appears to move first because it is the fastest. All finish stacked in the pocket. */
+.elevator-doors .door .panel { animation-duration: 2.0s; }
+
+.elevator-doors .door.left  .inner  { animation-name: elev-inner-left;  border-right: 1px solid #2a2a2a; }
+.elevator-doors .door.left  .middle { animation-name: elev-middle-left; }
+.elevator-doors .door.left  .outer  { animation-name: elev-outer-left; }
+
+.elevator-doors .door.right .inner  { animation-name: elev-inner-right;  border-left: 1px solid #2a2a2a; border-right: 2px solid #3a3a3a; }
+.elevator-doors .door.right .middle { animation-name: elev-middle-right; }
+.elevator-doors .door.right .outer  { animation-name: elev-outer-right;  border-right: none; }
+
+@keyframes elev-inner-left   { to { transform: translateX(-300%); } }
+@keyframes elev-middle-left  { to { transform: translateX(-200%); } }
+@keyframes elev-outer-left   { to { transform: translateX(-100%); } }
+@keyframes elev-inner-right  { to { transform: translateX(300%); } }
+@keyframes elev-middle-right { to { transform: translateX(200%); } }
+@keyframes elev-outer-right  { to { transform: translateX(100%); } }
+
 </style>
+
+<script>
+// Marp bridge: when a slide becomes active (bespoke-marp-active), postMessage
+// to every iframe inside it so iframe animations can reset and replay.
+// Needed because file:// iframes are cross-origin to the parent, so iframes
+// can't observe parent slide classes directly.
+(function(){
+  if (window.__marpSlideBridge) return;
+  window.__marpSlideBridge = true;
+  function wire() {
+    var slides = document.querySelectorAll('svg.bespoke-marp-slide');
+    if (!slides.length) { setTimeout(wire, 150); return; }
+    slides.forEach(function(slide){
+      if (slide.__wired) return;
+      slide.__wired = true;
+      function broadcast() {
+        slide.querySelectorAll('iframe').forEach(function(f){
+          try { f.contentWindow.postMessage('bespoke:active', '*'); } catch(e) {}
+        });
+      }
+      new MutationObserver(function(){
+        if (slide.classList.contains('bespoke-marp-active')) broadcast();
+      }).observe(slide, { attributes: true, attributeFilter: ['class'] });
+      if (slide.classList.contains('bespoke-marp-active')) broadcast();
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', wire);
+  } else {
+    wire();
+  }
+})();
+</script>
+
+<!-- _class: notice -->
+<!-- _paginate: false -->
+
+# Wear headphones
+
+## Audio channel
+
+<div class="ch-badge">8</div>
+
+<p>audio runs through the venue system · talk starts shortly</p>
+
+<!--
+Pre-start slide. Leave on screen while the audience arrives and finds seats. Only advance when ready to begin.
+-->
+
+---
 
 <!-- _class: cover -->
 <!-- _paginate: false -->
+
+<div class="elevator-doors">
+  <div class="door left">
+    <div class="panel outer"></div>
+    <div class="panel middle"></div>
+    <div class="panel inner"></div>
+  </div>
+  <div class="door right">
+    <div class="panel inner"></div>
+    <div class="panel middle"></div>
+    <div class="panel outer"></div>
+  </div>
+</div>
 
 # Think Local
 
 <div class="subtitle">
 Magic at your fingertips<br>
 Michael Gerasymenko · ElevenLabs<br>
-NextApp DevCon Swift · 2026
+next.app devCon Swift · 2026
 </div>
 
 <!--
+[Elevator doors close the screen for ~1.3s, then slide open over 2s to reveal the title. Matches the industrial elevator the projection sits above.]
+
 Hey everyone. My name is Michael Gerasymenko. Thanks for having me.
 
 Next forty-five minutes: on-device AI. What it is, what runs today, what breaks, where it goes.
@@ -460,12 +626,15 @@ Hold questions for the end. Or catch me in the hallway. Or on LinkedIn.
 # Who am I
 
 - Building mobile apps since **2009**
-- iOS everywhere: Readdle, Wire, CaraCare, Feeld, now ElevenLabs
-- Author of **XcodeSelectiveTesting**
+- Readdle, Wire, CaraCare, Feeld, now ElevenLabs
+- Author of **mikeger/XcodeSelectiveTesting**
+- Originally from **Ukraine**, living and working in **Berlin**
 - Blog: [gera.cx](https://gera.cx)
 
 <!--
 Building iOS since 2009, when the SDK first dropped. Readdle, Wire, CaraCare, Feeld, now ElevenLabs. Also maintain an open-source tool, XcodeSelectiveTesting, for test optimisation.
+
+Originally from Ukraine, living in Berlin for a few years now. Which, by the way, is where this conference is, so hello neighbours.
 
 Point being: when I talk about mobile shifts later, I watched them happen.
 -->
@@ -476,10 +645,10 @@ Point being: when I talk about mobile shifts later, I watched them happen.
 
 <div class="label">ELEVENLABS / CONTEXT</div>
 
-# ElevenLabs
+# IIElevenLabs
 
-- The Voice AI · over $600M ARR · valued at $22B
-- Started here six months ago, company went 400 → 800 people
+- The Voice AI
+- Started here seven months ago, company went 400 → 800 people
 - I'm on the Mobile team, working on **ElevenReader**
 - We're hiring, also remote
 - *Opinions are my own*
@@ -487,7 +656,7 @@ Point being: when I talk about mobile shifts later, I watched them happen.
 <!--
 I work at ElevenLabs. The voice AI company. Our CEO Mati keeps saying voice will be the interface for AI, and the numbers back it up.
 
-Joined six months ago. We doubled headcount in that time. Mobile team is hiring, remote is fine.
+Joined seven months ago. We doubled headcount in that time. Mobile team is hiring, remote is fine.
 
 I work on ElevenReader. If you want to see what the research team ships, that's the app. Catch me after and I can set you up with a free annual subscription. Small catch: tell me about any bugs.
 
@@ -500,172 +669,10 @@ Opinions here are my own.
 
 <div class="num">Part One</div>
 
-# The Pattern
-
-<!--
-Three short historical stories. They are the whole reason I think on-device AI matters.
--->
-
----
-
-<!-- _class: chapter -->
-
-<div class="num">Chapter I</div>
-
-# Time
-
----
-
-<!-- _class: story -->
-
-<div class="kicker">BEFORE / Chapter I</div>
-
-# Precise time
-
-<img class="art" src="assets/big-ben.jpg" />
-
-<!--
-We complain about not having enough time. People in the past had a worse problem. They couldn't tell what time it was.
-
-Medieval European town. The biggest building has a huge clock on it. Bells ring at specific hours. Someone walks door to door to wake people up. Time was infrastructure. You looked up at the tower. If you couldn't see it, you didn't know.
-
-Peasant, merchant, scholar. None of them had a way to privately know the exact time.
--->
-
----
-
-<!-- _class: story -->
-
-<div class="kicker">BEFORE / Chapter I</div>
-
-# Sailors got lost at sea
-
-<img class="art" src="assets/sailors.png" />
-
-<!--
-1714. The British Empire is losing ships. Storms were not the reason. Enemies were not the reason. Sailors could not tell where they were.
-
-To know your longitude at sea, you need the exact time back at your home port. No clock on earth survived an ocean voyage. Temperature, humidity, pitch and roll broke them all.
-
-Parliament offers twenty thousand pounds. Millions in today's money. To anyone who can build one.
--->
-
----
-
-<!-- _class: story -->
-
-<div class="kicker">AFTER / Chapter I</div>
-
-# Time moved onto your wrist
-
-<img class="art" src="assets/wristwatch.png" />
-
-<!--
-John Harrison spent forty years building a chronometer that worked at sea. A century later, wristwatches were cheap for everyone.
-
-If you asked a medieval peasant to imagine the future of time, they would have described a bigger clock tower. Maybe one with lights. They would never have imagined a personal pocket watch.
-
-The centralised source was what they knew.
--->
-
----
-
-<!-- _class: chapter -->
-
-<div class="num">Chapter II</div>
-
-# Computer Time
-
----
-
-<!-- _class: story -->
-
-<div class="kicker">BEFORE / Chapter II</div>
-
-# You walked to the computer
-
-<img class="art" src="assets/punch-cards.png" />
-
-<!--
-My mother, in the 1970s, wrote her university assignments on punch cards. Walked to the university basement. Handed them to an operator. The task ran overnight. She came back the next day. Sometimes to find a single letter wrong.
-
-Computing lived in a room. You visited it.
-
-Same shape as the town clock.
--->
-
----
-
-<!-- _class: story -->
-
-<div class="kicker">AFTER / Chapter II</div>
-
-# The computer walked into your pocket
-
-<img class="art" src="assets/iphone-2g.jpg" />
-
-<!--
-Then it moved. First onto desks. Then into pockets. I started building for iPhone in 2009.
-
-When Steve Jobs held up that phone in 2007, nobody in that room predicted a billion-dollar photo filter app. Nobody predicted summoning strangers' cars. Nobody predicted replacing SMS with a chat app.
-
-Those products appeared because the technology moved to the person. Social patterns died too. Waiting by the landline for a call you could not miss has evaporated for anyone under twenty-five.
--->
-
----
-
-<!-- _class: chapter -->
-
-<div class="num">Chapter III</div>
-
-# Next Revolution
-
----
-
-<!-- _class: big -->
-
-<div class="label">THE PATTERN</div>
-
-<h1>It happens again. <br> It happens faster.</h1>
-
-<!--
-Four hundred years for clocks. Fifty years for factory power. Twenty for computers. Fifteen for mobile.
-
-Every wave is faster. Every wave, we underestimated what people would do with the capability once it was personal and private, instead of centralised.
--->
-
----
-
-<!-- _class: now -->
-
-<div class="label">RIGHT NOW</div>
-
-# We rent thinking by the token
-
-<div class="body">
-Today, if you want to think with AI, you send your data to someone else's building and pay for the round trip.
-
-<strong>This is the last decade you'll do that.</strong>
-</div>
-
-<!--
-Which brings us to right now. If you want to think with AI, you send your prompt to a data centre in Virginia or Oregon, and you pay for the round trip by the token. Your users' voices. Your customers' medical records. Your own ideas.
-
-Soon, "wait, you had to send your data to a server?" will sound as antique as "wait, you had to be home to receive a phone call?"
-
-The technology will move. Physics, economics, privacy all point the same way. That shift is inevitable.
--->
-
----
-
-<!-- _class: chapter -->
-
-<div class="num">Part Two</div>
-
 # Under the Hood
 
 <!--
-OK. On-device AI is coming. What does that actually mean? What is a model that we're running? Why does it need compiling? Why is Apple's stack different from everyone else's?
+Before we talk about where this is going, let me show you how it actually works today. What is a model that we're running? Why does it need compiling? Why is Apple's stack different from everyone else's?
 
 Next ten minutes, I'll demystify it. I'm not teaching you ML. Just enough mental model that when someone throws words at you (quantization, NPU, fp16), you have intuition for what they mean.
 -->
@@ -674,8 +681,8 @@ Next ten minutes, I'll demystify it. I'm not teaching you ML. Just enough mental
 
 # A model is a function
 
-```
-function model(input: [float]) -> [float] {
+```swift
+func model(input: [Float]) -> [Float] {
     // billions of multiplications later
     return output
 }
@@ -689,6 +696,62 @@ That is it. No magic.
 Text-to-speech: input encodes the text, output encodes a waveform. Image classifier: input is pixels, output is "this is seventy-three percent a cat."
 
 The entire intelligence of the model lives in the numbers it uses to transform input into output. Those numbers are called weights.
+-->
+
+---
+
+<div class="label">PRIMER</div>
+
+# Vector + matrix
+
+<div class="primer">
+<style>
+.primer { display: flex; align-items: flex-start; justify-content: center; gap: 90px; margin-top: 50px; }
+.primer .box { display: flex; flex-direction: column; align-items: center; }
+.primer .cap { font-size: 15px; font-weight: 700; letter-spacing: 2px; color: #999; text-transform: uppercase; margin-bottom: 18px; }
+.primer .vector-grid { display: grid; grid-template-columns: 70px; grid-template-rows: repeat(4, 70px); gap: 6px; }
+.primer .matrix-wrap { display: grid; grid-template-columns: 36px 1fr; grid-template-rows: 36px 1fr; gap: 10px; }
+.primer .matrix-grid { display: grid; grid-template-columns: repeat(4, 70px); grid-template-rows: repeat(3, 70px); gap: 6px; }
+.primer .cell { display: flex; align-items: center; justify-content: center; border: 1.5px solid #BBB; border-radius: 6px; color: #333; font-size: 22px; font-weight: 500; background: #FFF; }
+.primer .row-labels { display: grid; grid-template-rows: repeat(3, 70px); gap: 6px; align-items: center; font-size: 12px; font-weight: 700; color: #999; text-align: right; padding-right: 4px; letter-spacing: 1px; }
+.primer .col-labels { display: grid; grid-template-columns: repeat(4, 70px); gap: 6px; justify-items: center; font-size: 12px; font-weight: 700; color: #999; letter-spacing: 1px; }
+.primer .corner { }
+.primer .shape { font-size: 13px; color: #AAA; margin-top: 14px; font-weight: 500; letter-spacing: 1px; }
+</style>
+
+<div class="box">
+  <div class="cap">Vector</div>
+  <div class="vector-grid">
+    <div class="cell">x₁</div>
+    <div class="cell">x₂</div>
+    <div class="cell">x₃</div>
+    <div class="cell">x₄</div>
+  </div>
+  <div class="shape">ordered list · 4 numbers</div>
+</div>
+
+<div class="box">
+  <div class="cap">Matrix</div>
+  <div class="matrix-wrap">
+    <div class="corner"></div>
+    <div class="col-labels"><span>col 1</span><span>col 2</span><span>col 3</span><span>col 4</span></div>
+    <div class="row-labels"><span>row 1</span><span>row 2</span><span>row 3</span></div>
+    <div class="matrix-grid">
+      <div class="cell">w</div><div class="cell">w</div><div class="cell">w</div><div class="cell">w</div>
+      <div class="cell">w</div><div class="cell">w</div><div class="cell">w</div><div class="cell">w</div>
+      <div class="cell">w</div><div class="cell">w</div><div class="cell">w</div><div class="cell">w</div>
+    </div>
+  </div>
+  <div class="shape">grid · 3 rows × 4 columns</div>
+</div>
+</div>
+
+<!--
+Twenty seconds of maths, for anyone who last saw this in school.
+
+A vector is an ordered list of numbers. A matrix is a grid of numbers, laid out in rows and columns. The weights of a model live in matrices like this.
+
+The operation inside every ML model: multiply a vector by a matrix, get a vector back. Then do it a few billion more times.
 -->
 
 ---
@@ -709,8 +772,8 @@ A modern model does billions of these every second.
 
 - Billions of numbers in a specific layout
 - Stored as **floats** (fp32, fp16, bf16) or **ints** (int8, int4)
-- A file. Usually hundreds of MB to several GB.
-- *This is what you ship to the device.*
+- A file couple of hundreds of MB to several GB
+- This is what you ship to the device
 
 <!--
 When we say "ship the model to the device," we mean ship a file with those billions of numbers in it.
@@ -807,23 +870,6 @@ This is why on-device models often have a visible "preparing" moment the first t
 One source model, four target formats, four pieces of silicon. Each conversion is non-trivial. Each target has its own op coverage, its own quantization support, its own debugging tools. This is what "fragmentation" actually looks like.
 -->
 
----
-
-# Why one model file won't run everywhere
-
-- Apple ANE ≠ Qualcomm Hexagon ≠ Mediatek APU ≠ Google Tensor ≠ Samsung ENN
-- Each needs the model **compiled for it**
-- Different formats: `.mlpackage`, `.aimodel`, `.tflite`, `.pte`, `.onnx`
-- Different quantization support
-- Different op coverage
-
-<!--
-Critical point. The compiled model for an iPhone is nothing like the compiled model for an Android phone.
-
-Apple's Neural Engine, Qualcomm's Hexagon DSP, MediaTek's APU, Google's Tensor. Each has its own instruction set, its own op coverage, its own quirks. The shippable artefact is usually a model in a portable format that gets re-compiled on each device at install or first launch.
-
-Some chipset vendors offer their own SDK with pre-compiled models. Others expect you to use a cross-platform runtime. There is no "one model binary everywhere." That fragmentation is one of the real costs of on-device AI.
--->
 
 ---
 
@@ -833,14 +879,8 @@ Some chipset vendors offer their own SDK with pre-compiled models. Others expect
 
 <div class="cue">On-device · airplane mode · my phone</div>
 
-<div class="credit"><strong>Model:</strong> ElevenLabs Research team · <strong>Integration:</strong> Michael Gerasymenko</div>
+<div class="credit"><strong>Model:</strong> ElevenLabs Lite V2 · <strong>Integration:</strong> Michael Gerasymenko</div>
 
-<div class="hints">
-Pre-warm backstage.<br>
-Airplane mode toggle visible.<br>
-Audio through the venue PA.<br>
-Backup video on next slide.
-</div>
 
 <!--
 [Walk to the device. Pause.]
@@ -851,31 +891,165 @@ Everything we just talked about, running on this phone. Airplane mode is on. No 
 
 That is what we are here to talk about.
 
-STAGE NOTES:
-- Device: A19 or newer only (iPhone 17 Pro, 18 Pro). Older chips risk minutes-long cold compile.
-- Pre-warm backstage: load the model, run two or three full synthesis cycles, confirm cache hit, then background the app.
-- Airplane mode toggle in front of the audience. Status bar must be visible on the mirrored screen.
-- Audio through the venue PA. Confirm during AV check.
-- Second iPhone in the bag as hardware backup, same pre-warm done.
-- If both devices fail, press space. The next slide is the pre-recorded backup video.
-- If skipping entirely: say "I would love to demo this live but I can show you the recording instead" and advance to the next slide.
 -->
 
 ---
 
-<!-- _class: demo -->
+<!-- _class: chapter -->
 
-# Backup
+<div class="num">Part Two</div>
 
-<div class="cue">Pre-recorded · same device · same airplane mode</div>
+# Lessons
 
 <!--
-[Only reached if live demo fails or is skipped. Pre-recorded video of a working synthesis session. Narrate what the audience is seeing.]
 
-Same device, same airplane mode, recorded last week. The research app running the TTS pipeline on-device.
-
-[Placeholder: embed pre-recorded demo video file here before the talk. Keep the file as both an embedded resource and a desktop fallback.]
 -->
+
+---
+
+<div class="label">LESSON 1 · DISPATCH</div>
+
+# Dispatch is a planner decision, not a contract
+
+- You request a compute unit
+- The runtime decides placement
+- You might ask for the NPU and get the CPU
+- **Measure actual placement with a profiler. There is no code API for it.**
+
+<!--
+
+
+The run destination is just a hint.
+
+On both platforms: we asked for the NPU, the planner picked the CPU. On iOS the mature int8 kernels won. On Android the NPU delegate silently fell back for ops it couldn't lower.
+
+Set computeUnits to cpuAndNeuralEngine on iOS. You are offering the system a budget. It runs its own cost model and picks what it thinks is best. On iPhone 15, we repeatedly saw Core ML's CPU int8 path beat the Core AI GPU path for our workload. Eight years of hand-tuned NEON and AMX kernels is a hard baseline to clear.
+
+Android does the same thing. You hand a graph to the NPU delegate, it silently falls back to CPU for ops the NPU does not support.
+
+"Did the NPU run my model" is a question you answer with Instruments or perfetto, not with code. There is no why-not-the-NPU tool today. Apple folks, this is my ask.
+-->
+
+---
+
+<div class="label">LESSON 2 · SHAPES</div>
+
+# NPUs demand static shapes
+
+- NPUs plan memory and shaders at compile time
+- Dynamic input shapes trigger a recompile. Every. Call.
+- Seconds to tens of seconds on older silicon. On Qualcomm QNN, the compiler refuses outright.
+- **Fix: pad inputs to a small set of fixed bucket sizes.**
+
+<!--
+Lesson three. NPUs need static shapes.
+
+Dynamic shapes feel innocent in Python. On device they are brutal. Every new input shape triggers a recompile. On the Apple A16 chip that is five to twenty seconds. On Qualcomm QNN the compiler refuses dynamic shapes outright.
+
+Second cost. The Apple GPU has a hard ceiling of thirty-two Metal residency sets. One per unique shape. Hit thirty-three, start evicting. On Android, each pad bucket ships as a separate compiled artefact in the APK.
+
+Fix is the same on both platforms. Pad inputs to a small set of fixed bucket sizes. One compiled artefact per bucket. Waste some compute on padding. Still the right call.
+-->
+
+---
+
+<!-- _class: anim -->
+
+<iframe src="assets/anim/static-vs-dynamic.html"></iframe>
+
+<!--
+Both rows run ten inferences. Top: static shape, model compiles once, every inference is cheap. Bottom: dynamic shape, every new input triggers a recompile. Static finishes while dynamic is still working.
+-->
+
+---
+
+<div class="label">LESSON 3 · FIRST LAUNCH</div>
+
+# Cold compile is a UX event
+
+- Portable model file → native code happens on first load
+- Minutes on older silicon. Tens of seconds on new.
+- Cached per device, per OS version
+- **Pre-warm, or ship pre-compiled artefacts**
+
+<!--
+Lesson four. First-launch compile is a UX event.
+
+The first time a model loads on a device, the runtime compiles it to native code for that chip. Simple classifier, fast. Serious multi-stage pipeline, less so.
+
+On iPhone 17 Pro we saw about sixty seconds for one of our pipelines. On iPhone 15, several minutes. Older devices, worse.
+
+Cache saves subsequent launches. First time, you need UI. "Preparing." Make it a feature.
+
+Long-term fix. Compile ahead of time, during your app build, on CI. Apple ships `xcrun coreai-build compile` for this. On Android, QNN forces the AOT path anyway. We are moving towards that on iOS.
+-->
+
+---
+
+<div class="label">LESSON 4 · MEMORY</div>
+
+# Peak memory kills more models than latency
+
+- Hybrid pipeline + fallback peaks **~1.4 GB** on a 6 GB device
+- One variant was retired after OOMing at a **3 GB** during setup
+- On low-RAM devices, split sub-models across CPU and NPU
+- Memory warnings fire. Don't unload mid-session
+
+<!--
+Lesson five. Memory kills more models than latency does.
+
+iPhone 15 is a six gigabyte device. Our hybrid pipeline plus a fallback peaks at about 1.4 gigabytes during setup. One variant OOMed at a three gigabyte watermark during specialisation. We retired it.
+
+On devices with four and a half gigs of RAM or less, we route some pieces to CPU only to bound the NPU residency footprint. Worse latency, lower memory. Trade-off made.
+
+We hook memory warnings. We do not unload mid-session. Reload is worse than the pressure. Pick your poison.
+-->
+
+---
+
+<div class="label">LESSON 5 · PERF HYGIENE</div>
+
+# Three things that silently cost you 30%
+
+- **Debug builds.** Release is ~1.3× faster. Always benchmark Release.
+- **File I/O in the hot path.** Even logging kills throughput. 30% in our case.
+- **Diagnostic loops left behind.** A `minV/maxV/meanV` sanity check cost us 2× for a week.
+
+<!--
+Lesson six. Three universal perf traps.
+
+Always benchmark Release. Debug is one-point-three times slower for inference. You will chase phantom regressions in Debug.
+
+Never do file I/O in the inference hot path. Diagnostic file writes, thirty-nine per synthesis, cost us thirty percent throughput. Removed them. Got it back.
+
+Discipline one. If you add a debug min, max, mean loop over the output tensor to sanity-check, remember to remove it. Mine cost two times for a week.
+
+These are embarrassing but universal.
+-->
+
+---
+
+<div class="label">LESSON 6 · THERMAL</div>
+
+# The phone gets hot
+## Sustained inference is a different workload
+
+- Cold-phone benchmarks are the best case, not the common case
+- ANE and Hexagon both clock down once skin temperature climbs
+- Latency can double a minute into a long session
+- Measure warm. Record device temperature next to your numbers.
+
+<!--
+Lesson seven. Thermal.
+
+Easy trap. You benchmark at your desk, the phone is cool, numbers look great. User runs it for two minutes in a warm pocket and latency doubles. Both Apple silicon and Qualcomm throttle aggressively once skin temperature crosses roughly forty Celsius. The NPU is often the first to clock down because fixed-function silicon runs hot per square millimetre.
+
+Rule we use. Always profile after at least sixty seconds of sustained load. Record skin temperature next to your numbers. A benchmark without a temperature reading is a marketing claim.
+-->
+
+---
+
+<img src="assets/fridge.jpg" width=450>
 
 ---
 
@@ -883,14 +1057,10 @@ Same device, same airplane mode, recorded last week. The research app running th
 
 <div class="num">Part Three</div>
 
-# iOS
+# iOS specifics
 
 <!--
-The fun part. What this looks like when you build it for iOS.
-
-Six months at ElevenLabs on this. I'll share what we learned.
-
-Disclaimer. Our model internals stay inside the company. The integration story is fair game. The stack, the pipeline, the pitfalls. All the engineering around the model.
+Three things that are iOS-only, worth knowing if you ship on this platform.
 -->
 
 ---
@@ -922,295 +1092,77 @@ Disclaimer. Our model internals stay inside the company. The integration story i
 </div>
 
 <!--
-Thirty-second anchor for anyone who has not shipped on this stack before. Four terms will come up constantly. Here they are. Skip ahead mentally if you know them.
+Thirty-second anchor for anyone who has not shipped on this stack. Four terms will come up constantly. Skip ahead mentally if you know them.
 -->
 
 ---
 
-<div class="label">THE APPLE STACK</div>
+<div class="label">iOS · THE STACK SHIFT</div>
 
-# What Apple gives you
+# Core AI is new in iOS 27
 
-<div class="two-col">
-<div>
-<h3>Core ML</h3>
-<p>The default runtime. Dispatches to ANE / GPU / CPU automatically. <code>.mlpackage</code> format.</p>
-</div>
-<div>
-<h3>Metal Performance Shaders</h3>
-<p>Lower-level GPU compute. <code>MPSGraph</code> for custom ops.</p>
-</div>
-</div>
-
-<div class="two-col">
-<div>
-<h3>MLX</h3>
-<p>Apple's new array framework. PyTorch-like. Research-friendly. Shipping-friendly.</p>
-</div>
-<div>
-<h3>Foundation Models (26)</h3>
-<p>On-device LLM with a Swift API. Apple's own model. Not for your weights.</p>
-</div>
-</div>
+- Core ML since iOS 11 (`.mlpackage`). Mature kernels.
+- **Core AI** landed in iOS 27 (`.aimodel`). LLM-scale workloads, better memory control.
+- **The Swift API drifted between iOS 27 betas.** Build against the latest Xcode.
 
 <!--
-Apple gives you a stack of options.
+iOS-specific lesson one. The stack is shifting.
 
-Core ML is the default. You convert your model to a dot mlpackage, drop it in your bundle, call MLModel to load, call prediction to run. Dispatches to Neural Engine, GPU, or CPU automatically. Ninety percent of what you want.
+Core ML has been around since iOS 11. Mature, understood, fast. The default for most things.
 
-Metal Performance Shaders sits one layer down. Reach for it if you need a custom op or something hybrid.
+Core AI landed in iOS 27 at WWDC. New runtime, new format, built for LLM-scale models. Palettization, better memory control, closer to where the industry is going. Replaces Core ML for the heavy workloads over time.
 
-MLX is Apple's newer research framework. PyTorch-like, open source, runs on CPU and GPU on Apple Silicon. Increasingly a reasonable production target for things that don't convert cleanly to Core ML.
-
-Foundation Models arrived at WWDC. Apple's own on-device LLM with a Swift-first API. You cannot put your own weights in it. But if you want text completion, summarisation, classification on recent Apple hardware, you don't ship a model at all. Apple ships one with the OS.
+If you ship across iOS 17 to 27, you need both. Fence Core AI code with canImport CoreAI and available iOS 27. Expect the Swift API to drift in point releases. NDArray MutableView baseAddress moved to withUnsafeMutablePointer. AsyncValue ndArray became try await. Build against the latest Xcode.
 -->
 
 ---
 
-<div class="label">OUR PIPELINE</div>
+<div class="label">iOS · IP PROTECTION</div>
 
-# Three runtimes, one app
+# FairPlay for Core ML
 
-<div class="two-col">
-<div>
-<h3>Core ML</h3>
-<p>Default. iOS 17+. CPU/GPU/ANE dispatch. Mature kernels.</p>
-</div>
-<div>
-<h3>Core AI</h3>
-<p>New. iOS 27+. Palettization, better memory control. Still maturing.</p>
-</div>
-</div>
-
-<div class="two-col">
-<div>
-<h3>MLX</h3>
-<p>Research-first. We use it on Mac; iOS still ahead.</p>
-</div>
-<div>
-<h3>Reality</h3>
-<p>Production uses <strong>all three in the same pipeline</strong>, per sub-model.</p>
-</div>
-</div>
+- Apple ships model encryption integrated with the Core ML load path
+- Keys delivered through Apple's licensing infrastructure
+- Pair with **App Attest** (device + binary attestation) + **Secure Enclave** (key wrapping)
+- Together: a serious at-rest + load-time protection stack
+- Doesn't close the final gap (see security section). Raises cost.
 
 <!--
-This one surprised me most. You don't pick a runtime for your app. You pick one per sub-model.
+iOS-specific lesson two. On IP protection, Apple gives you more than Android does.
 
-Our pipeline uses Core ML for some pieces, on CPU, and Core AI for others on the Neural Engine. The choice comes from benchmarks. Whatever is fastest on the target hardware for that specific graph wins.
+FairPlay for Core ML encrypts your model file at rest. Keys come through Apple's licensing infrastructure. Integrated with the Core ML load path, so decryption is transparent to your code.
+
+Combined with App Attest, which attests your binary and device identity to your server, you can refuse to deliver a key to a jailbroken client. Secure Enclave wraps the keys in hardware.
+
+That stack is the most mature on-device IP protection on any mobile platform today. It still has the fundamental gap we talked about in the security section, but it raises the cost of extraction materially.
 -->
 
 ---
 
-<!-- _class: subchapter -->
-
-<div class="num">iOS · beat two</div>
-
-# Dispatch
-
-<!--
-Now the dispatch question. You asked for the ANE. Did you get it?
--->
-
----
-
-<div class="label">PLACEMENT</div>
-
-# `.cpuAndNeuralEngine` is only a hint
-
-- You request a compute unit
-- Core ML / Core AI runs its own cost model over the whole graph
-- Decides: ANE, GPU, or CPU
-- **On A16, we asked for Neural Engine and got CPU.**
-- On another model, we asked for Neural Engine and got Metal.
-
-<!--
-If you remember one thing from this talk. When you set computeUnits to cpuAndNeuralEngine, you are offering the system a budget. The system then runs its own cost model across the whole graph and picks whatever it thinks is best. That might be the ANE. That might be CPU.
-
-On the iPhone 15, the A16 chip, we repeatedly saw Core ML's int8 CPU path beat Core AI's palettized GPU path for our workload. Eight years of hand-tuned NEON and AMX kernels is a hard baseline to clear.
-
-So "did the ANE run my model" is a question you answer with Instruments. There is no code API that tells you. There is no "why wasn't my op on ANE" tool either, as of the iOS 27 beta. I asked. Apple folks in the room, this is my ask.
--->
-
----
-
-<div class="label">SHAPES</div>
-
-# Tensor shapes: static vs dynamic
-
-A tensor "shape" is its dimensions. Something like `[1, 128, 512]`.
-
-<div class="two-col">
-<div>
-<h3>Static shape</h3>
-<p>All dimensions known at compile time. Memory layout is fixed.</p>
-</div>
-<div>
-<h3>Dynamic shape</h3>
-<p>One or more dimensions decided at runtime. Flexible, costly.</p>
-</div>
-</div>
-
-<p style="margin-top: 30px; max-width: 60ch;">GPUs and NPUs plan memory and shaders ahead of time. They prefer static.</p>
-
-<!--
-Before the trap, one concept. A tensor is a multi-dimensional array. Its shape is its dimensions. Something like one by one hundred and twenty-eight by five hundred and twelve.
-
-Static shape: every dimension known when the model compiles. Dynamic shape: at least one dimension decided at runtime, when the actual input arrives.
-
-Hardware accelerators plan memory layout and shader programs ahead of time, based on the shapes they expect. Shapes change, they replan.
--->
-
----
-
-<!-- _class: anim -->
-
-<iframe src="assets/anim/static-vs-dynamic.html"></iframe>
-
-<!--
-Both rows run ten inferences. Top row has a static shape. The model compiles once, every inference is cheap. Bottom row has a dynamic shape. Every new input triggers a recompile. Static finishes while dynamic is still working.
--->
-
----
-
-<div class="label">DYNAMIC SHAPES</div>
-
-# Dynamic shapes punish you twice
-
-- First time with a new shape: 5 to 20 seconds of recompilation on A16
-- Over time: 32 residency set ceiling on the A16 GPU, one slot per unique shape
-- Hit 33, start evicting
-- Fix: pad inputs to a small set of fixed buckets
-
-<!--
-Dynamic shapes feel innocent in Python. On device they are brutal.
-
-Every time a new input shape hits the graph, Core AI recompiles. On A16 that is five to twenty seconds. Unusable inside a UX loop.
-
-Second problem. The Apple GPU has a hard ceiling of thirty-two Metal residency sets. Each unique shape consumes one. Hit thirty-three, start evicting.
-
-The fix: do not let shapes vary. Pad everything to a small set of fixed bucket sizes. You waste compute on the padding. Still the right call.
--->
-
----
-
-<!-- _class: subchapter -->
-
-<div class="num">iOS · beat three</div>
-
-# Runtime
-
-<!--
-And the runtime chapter. What happens when the thing actually runs.
--->
-
----
-
-<div class="label">FIRST LAUNCH</div>
-
-# Cold compile is a UX event
-
-- First Core AI specialization for a fused ANE graph:
-  - **~60 s on A19** (iPhone 17 Pro)
-  - **Several minutes on A16** (iPhone 15)
-- Cached per device, per OS version
-- *Users see "preparing..." the first time. Always.*
-
-<!--
-This one will show up in your support tickets.
-
-The first time a model loads on a device, the runtime compiles it to native code for that chip. Simple classifier, fast. Serious pipeline with multiple pieces, less so.
-
-On an iPhone 17 Pro we saw about sixty seconds for one of our pipelines. On an iPhone 15, several minutes. Older devices, worse.
-
-The compiled artefact caches. Subsequent launches skip the compile. The first time, you need UI. "Preparing." Make it a feature. Warm up in the background when network is fine and the app is unlikely to be killed.
-
-Long-term fix is ahead-of-time compilation during the app build. Apple ships coreai-build compile for this. We are not there yet in our ship pipeline.
--->
-
----
-
-<div class="label">MEMORY</div>
-
-# Peak memory is where you die
-
-- Loading a hybrid pipeline + fallback can hit **~1.4 GB** on iPhone 15
-- One variant was retired after OOMing at a **3 GB** watermark during specialization
-- Low-RAM devices (≤4.5 GB): split sub-models across CPU and ANE
-- Memory-warning observer is wired. We *don't* unload mid-session.
-
-<!--
-Memory kills more models than latency does.
-
-iPhone 15 is a six-gigabyte device. Our hybrid pipeline plus a Core ML fallback peaks around 1.4 gigabytes during setup. One Core AI variant we tried OOMed at a three-gigabyte watermark during specialisation. We retired it.
-
-On devices with 4.5 gigs of RAM or less, we automatically route some pieces to CPU only, to bound the ANE residency footprint. Different placement, worse latency, lower memory.
-
-We hook memory warnings. We do not unload mid-session. Reloading mid-conversation is worse than the pressure. Pick your poison.
--->
-
----
-
-<div class="label">INTEGRATION</div>
+<div class="label">iOS · INTEGRATION</div>
 
 # Swift concurrency around ML
 
 ```swift
 @MainActor @Observable
-final class CoreMLTTSManager { ... }
+final class TTSManager { ... }
 
 nonisolated func synthesize(_ text: String) async throws -> AudioStream
 ```
 
-- Inference is `nonisolated async throws`
-- Internal engine is `@unchecked Sendable` with init-time static config
-- *Cancellation plumbing is weak. Plan it in from the start.*
+- Manager is `@MainActor @Observable` for UI binding
+- Inference is `nonisolated async throws`, off the main actor
+- Inner engine `@unchecked Sendable` with init-time static config
+- *Cancellation is weak. Core ML's `prediction` has no cancellation token.*
 
 <!--
-On the Swift side. The manager is MainActor Observable, for UI binding. Inference is nonisolated async throws, so it doesn't block the main actor.
+iOS-specific lesson three. Swift concurrency around ML.
 
-We mark the internal engine unchecked Sendable, with configuration that is write-once at init, read-only during inference. The pragmatic path.
+The manager is MainActor Observable for UI binding. Inference is nonisolated async throws, so it does not block the main actor.
+
+Internal engine is unchecked Sendable, with configuration that is write-once at init and read-only during inference. Pragmatic.
 
 Cancellation is the weakest part of our setup. MLModel's prediction call does not take a cancellation token. If you want to cancel mid-synthesis, split the pipeline into cancellable chunks. Plan it in from the start.
--->
-
----
-
-<div class="label">PERF HYGIENE</div>
-
-# Three things that silently cost you 30%
-
-- **Debug builds.** Core AI inference is ~1.3× slower in Debug
-- **File I/O in the hot path.** ~30% throughput loss from diagnostic file writes
-- **A `minV/maxV/meanV` loop** left in a hot path caused a 2× slowdown
-
-<!--
-These are embarrassing but universal.
-
-Always benchmark Release. Debug is about one-point-three times slower for Core AI inference, and you will chase phantom regressions.
-
-Never do file I/O in the hot path. We had diagnostic file writes, thirty-nine per synthesis, costing thirty percent throughput. Removed them, took it right back.
-
-Discipline one. If you add a debug min, max, mean loop over the output tensor to sanity-check, remember to remove it. Mine cost us a two times slowdown for a week.
--->
-
----
-
-<div class="label">iOS VERSIONS</div>
-
-# Version gates to know
-
-- **iOS 17+** · Core ML `.load(contentsOf:configuration:)` API
-- **iOS 27+** · Core AI framework entirely
-- **A14 minimum** for on-device TTS (practical floor)
-- **A16 vs A19:** same request, radically different timings
-- Fence with `#if canImport(CoreAI)` and `@available(iOS 27.0, *)`
-
-<!--
-Final platform note. Core AI landed in iOS 27. If you want to ship on earlier versions, you need Core ML. We ship both, selected at runtime.
-
-Hardware floor is practically A14 for anything the size of a serious model. Below that, memory and compute do not earn their keep.
-
-Something I did not expect. The Core AI Swift API changed between iOS 27 betas. NDArray MutableView baseAddress moved to withUnsafeMutablePointer. AsyncValue ndArray became try await. Fence everything with canImport CoreAI, or your build breaks on the next Xcode update.
 -->
 
 ---
@@ -1222,7 +1174,132 @@ Something I did not expect. The Core AI Swift API changed between iOS 27 betas. 
 # The Frontier
 
 <!--
-We have covered the inevitable: technology moving to the device. We have covered the engineering reality: how the stack actually works on iOS. I want to end on what is still unsolved, because that is where the next few years of this field will be fought.
+Honest tour done. Before we close, I want to show you where this all goes, and why I think it goes anywhere at all. Three short historical stories first. They are the whole reason I think on-device AI matters.
+-->
+
+---
+
+<!-- _class: chapter -->
+
+<div class="num">Chapter I</div>
+
+# Time
+
+---
+
+<!-- _class: story -->
+
+<div class="kicker">BEFORE / Chapter I</div>
+
+# Precise time
+
+<img class="art" src="assets/big-ben.jpg" />
+
+<!--
+We complain about not having enough time. People in the past had a worse problem. They couldn't tell what time it was.
+
+Medieval European town. The biggest building has a huge clock on it. Bells ring at specific hours. Someone walks door to door to wake people up. Time was infrastructure. You looked up at the tower. If you couldn't see it, you didn't know.
+
+Peasant, merchant, scholar. None of them had a way to privately know the exact time.
+-->
+
+
+---
+
+<!-- _class: story -->
+
+<div class="kicker">AFTER / Chapter I</div>
+
+# Time moved onto your wrist
+
+<img class="art" src="assets/wristwatch.png" />
+
+<!--
+John Harrison spent forty years building a chronometer that worked at sea. A century later, wristwatches were cheap for everyone.
+
+If you asked a medieval peasant to imagine the future of time, they would have described a bigger clock tower. Maybe one with lights. They would never have imagined a personal pocket watch.
+
+The centralised source was what they knew.
+-->
+
+---
+
+<!-- _class: chapter -->
+
+<div class="num">Chapter II</div>
+
+# Computer Time
+
+---
+
+<!-- _class: story -->
+
+<div class="kicker">BEFORE / Chapter II</div>
+
+# You walked to the computer
+
+<img class="art" src="assets/punch-cards.png" />
+
+<!--
+My mother, in the 1970s, wrote her university assignments on punch cards. Walked to the university basement. Handed them to an operator. The task ran overnight. She came back the next day. Sometimes to find a single letter wrong.
+
+Computing lived in a room. You visited it.
+
+Same shape as the town clock.
+-->
+
+---
+
+<!-- _class: story -->
+
+<div class="kicker">AFTER / Chapter II</div>
+
+# The computer walked into your pocket
+
+<img class="art" src="assets/iphone-2g.jpg" />
+
+<!--
+Then it moved. First onto desks. Then into pockets. I started building for iPhone in 2009.
+
+When Steve Jobs held up that phone in 2007, nobody in that room predicted a billion-dollar photo filter app. Nobody predicted summoning strangers' cars. Nobody predicted replacing SMS with a chat app.
+
+Those products appeared because the technology moved to the person. Social patterns died too. Waiting by the landline for a call you could not miss has evaporated for anyone under twenty-five.
+-->
+
+---
+
+<!-- _class: big -->
+
+<div class="label">THE PATTERN</div>
+
+<h1>It happens again. <br> It happens faster.</h1>
+
+<!--
+Four hundred years for clocks. Fifty years for factory power. Twenty for computers. Fifteen for mobile.
+
+Every wave is faster. Every wave, we underestimated what people would do with the capability once it was personal and private, instead of centralised.
+-->
+
+---
+
+<!-- _class: now -->
+
+<div class="label">RIGHT NOW</div>
+
+# We rent thinking by the token
+
+<div class="body">
+Today, if you want to think with AI, you send your data to someone else's building and pay for the round trip.
+
+<strong>This is the last decade you'll do that.</strong>
+</div>
+
+<!--
+Which brings us to right now. If you want to think with AI, you send your prompt to a data centre in Virginia or Oregon, and you pay for the round trip by the token. Your users' voices. Your customers' medical records. Your own ideas.
+
+Soon, "wait, you had to send your data to a server?" will sound as antique as "wait, you had to be home to receive a phone call?"
+
+The technology will move. Physics, economics, privacy all point the same way. That shift is inevitable. Four pieces to the puzzle.
 -->
 
 ---
@@ -1254,7 +1331,7 @@ Piece two: memory bandwidth. The harder constraint for LLM inference. Jumped sev
 <iframe src="assets/anim/path-to-gpt4.html#3"></iframe>
 
 <!--
-Piece three: software. Four model-side techniques compound. Int4 quantization. Mixture of experts. Partial loading from flash. Distillation. Each multiplies effective capacity on the same hardware.
+Piece three: software. Five model-side techniques compound. Int4 quantization, four times smaller. Mixture of experts, roughly seven times effective capacity. Partial loading from flash, model streams on demand. Distillation, small models trained on big-model outputs. Sparsity, zero out and skip. Stacked together, ten to fifty times effective capacity on the same hardware.
 -->
 
 ---
@@ -1273,7 +1350,7 @@ Both platforms. Both ecosystems get there within months of each other.
 
 # Security is the real blocker
 
-The model file is the asset. A trained model represents millions of dollars of compute, proprietary data, and years of research. Protecting it on an untrusted device is an unsolved problem.
+<p style="text-align: center; max-width: 60ch; margin: 0 auto;">The model file is the asset. A trained model represents a big sum of dollars of compute, proprietary data, and years of research. Protecting it on an untrusted device is an unsolved problem.</p>
 
 <!--
 Six months ago I thought the hard problem was performance. It is not. Performance is a solvable engineering problem. The hard problem is protecting the model from the device it runs on.
@@ -1287,13 +1364,13 @@ For a company whose moat is its model, this is existential. For an open-source m
 
 <div class="label">THE THREAT MODEL</div>
 
-# What an attacker with a device can do
+# What an attacker can do
 
 - Pull the model file out of app storage, over USB or ADB
 - Hook the inference call with Frida or LLDB
 - Dump decrypted weights from process memory
 - Replay or clone the model on their own hardware
-- *Encryption at rest does nothing. The model has to decrypt to run.*
+- Encryption at rest does nothing. The model has to decrypt to run.
 
 <!--
 If I ship my weights to your device, I have effectively handed them over. The license fiction doesn't help once the bits are inside your sandbox.
@@ -1354,7 +1431,7 @@ Stacked together, this is what a serious on-device deployment looks like today.
 - No developer-accessible trusted execution environment large enough for a model
 - No hardware memory encryption that excludes a root-level reader on a jailbroken device
 - No attested execution that binds (model hash, program hash, device identity) to a third-party key release
-- *This is why high-value proprietary models still live in the cloud.*
+- This is why high-value proprietary models still live in the cloud.
 
 <!--
 Where the stack breaks down is at the last mile. Even with App Attest, FairPlay, Secure Enclave key wrapping, there is a moment during inference when the decrypted weights sit in GPU or NPU memory. A root-level process on a jailbroken device can read that memory.
@@ -1370,15 +1447,40 @@ This is why ElevenLabs, OpenAI, Anthropic, Google, Meta all keep their best mode
 
 - You don't need **your** model on-device
 - Hundreds of production-quality open models exist (Llama, Mistral, Whisper, Qwen, Gemma, ...)
-- They're safe to ship. The "IP" is public.
+- They're safe to ship
 - **The product is what you build *around* the model.**
 
 <!--
-There is an opening. You do not need your own model on-device to build a great product. Thousands of excellent open-source models exist. Llama, Mistral, Whisper for speech-to-text, Qwen, Gemma. The Chinese labs ship monthly. All safe to deploy, because the weights are already public.
+There is an opening. You do not need your own model on-device to build a great product. Hundreds of production-quality open models exist. Llama, Mistral, Whisper for speech-to-text, Qwen, Gemma. The Chinese labs ship monthly. All safe to deploy, because the weights are already public.
 
 The IP sits in the product you build around the model. The UX. The data layer. The agentic logic. The integration with the rest of the user's device.
 
 That is the design space that opens up when thinking shifts to the edge.
+-->
+
+---
+
+<div class="label">WHERE THE WORLD IS HEADING</div>
+
+# Models are becoming commodity
+
+- Swap one frontier model for another. Most apps barely notice
+- I moved from Opus to Grok 4.6 fast last week. Didn't feel it
+- Model is a technology: Three years ago we used GPT-3.5 directly
+- You cannot make a model smarter if the training data isn't
+- Honed products eat raw models
+
+
+<!--
+Here is where I think the world is heading.
+
+Models are becoming commodity. Last week I moved my daily coding workflow from Opus to Grok 4.6 fast. The difference was marginal. Three years ago we were all talking to GPT-3.5 directly, through a text box. Soon nobody will. The raw model is becoming infrastructure, not a product.
+
+There is a ceiling on how smart a model can get if the training data does not get smarter. We are approaching that ceiling with internet-scale text. The next decade of value is not in better models, it is in better products built on commodity models.
+
+Concrete example. The app I work on, ElevenReader, uses ElevenLabs TTS. In principle the TTS could be swapped for Kokoro or Piper or whatever ships next month. The product is not the TTS. It is the reading experience. The library. The voice selection. The way it handles long-form content. The UX.
+
+Build products, not model wrappers.
 -->
 
 ---

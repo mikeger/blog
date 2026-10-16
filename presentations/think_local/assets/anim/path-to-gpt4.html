@@ -151,10 +151,21 @@
     transform: translateY(0);
   }
 
-  .scene.active .mult:nth-child(1) { transition-delay: 0.3s; }
-  .scene.active .mult:nth-child(2) { transition-delay: 0.6s; }
-  .scene.active .mult:nth-child(3) { transition-delay: 0.9s; }
-  .scene.active .mult:nth-child(4) { transition-delay: 1.2s; }
+  .scene.active .mult:nth-child(1) { transition-delay: 0.2s; }
+  .scene.active .mult:nth-child(2) { transition-delay: 0.4s; }
+  .scene.active .mult:nth-child(3) { transition-delay: 0.6s; }
+  .scene.active .mult:nth-child(4) { transition-delay: 0.8s; }
+  .scene.active .mult:nth-child(5) { transition-delay: 1.0s; }
+  .scene.active .mult:nth-child(6) { transition-delay: 1.3s; }
+
+  .mult:nth-child(6) {
+    border-left-color: var(--mid);
+    background: #1C1C1C;
+  }
+  .mult:nth-child(6) .mult-value {
+    color: var(--ink);
+    font-style: italic;
+  }
 
   .mult-value {
     font-size: 32px;
@@ -331,6 +342,16 @@
       <div class="mult-name">Distillation</div>
       <div class="mult-note">Small models trained on big-model outputs</div>
     </div>
+    <div class="mult">
+      <div class="mult-value">3–5×</div>
+      <div class="mult-name">Sparsity</div>
+      <div class="mult-note">Zero out and skip unused weights at inference</div>
+    </div>
+    <div class="mult">
+      <div class="mult-value">stack</div>
+      <div class="mult-name">All of the above, together</div>
+      <div class="mult-note">Compound effect: ~10–50× effective capacity on the same silicon</div>
+    </div>
   </div>
 </div>
 
@@ -361,6 +382,18 @@
   }
   show();
   window.addEventListener('hashchange', show);
+
+  // Forward slide-nav keys to Marp parent when iframe has focus.
+  window.addEventListener('keydown', (e) => {
+    const nav = ['ArrowRight','ArrowLeft','ArrowUp','ArrowDown',' ','PageDown','PageUp','Home','End'];
+    if (!nav.includes(e.key)) return;
+    try {
+      window.parent.document.dispatchEvent(new KeyboardEvent('keydown', {
+        key: e.key, code: e.code, keyCode: e.keyCode, which: e.keyCode,
+        bubbles: true, cancelable: true
+      }));
+    } catch (err) {}
+  });
 </script>
 
 </body>

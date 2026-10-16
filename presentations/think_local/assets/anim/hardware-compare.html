@@ -99,7 +99,9 @@
     width: 0;
     border-radius: 8px;
     animation: fill 1.1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation-play-state: paused;
   }
+  body.playing .bar { animation-play-state: running; }
 
   @keyframes fill {
     to { width: var(--pct); }
@@ -115,8 +117,10 @@
     color: var(--ink);
     opacity: 0;
     animation: fadein 0.4s ease forwards;
+    animation-play-state: paused;
     text-align: left;
   }
+  body.playing .speed-tag { animation-play-state: running; }
 
   .speed-tag small {
     display: block;
@@ -157,7 +161,9 @@
     font-weight: 500;
     opacity: 0;
     animation: fadein 0.5s ease forwards 2.3s;
+    animation-play-state: paused;
   }
+  body.playing .caption { animation-play-state: running; }
 </style>
 </head>
 <body>
@@ -198,6 +204,67 @@
 
 </div>
 
+<script>
+  // Forward slide-nav keys to Marp parent when iframe has focus.
+  window.addEventListener('keydown', (e) => {
+    const nav = ['ArrowRight','ArrowLeft','ArrowUp','ArrowDown',' ','PageDown','PageUp','Home','End'];
+    if (!nav.includes(e.key)) return;
+    try {
+      window.parent.document.dispatchEvent(new KeyboardEvent('keydown', {
+        key: e.key, code: e.code, keyCode: e.keyCode, which: e.keyCode,
+        bubbles: true, cancelable: true
+      }));
+    } catch (err) {}
+  });
+
+  // Replay the CSS animations each time the parent bespoke slide becomes active.
+  // Pause→reset→resume: strip the gating class, swap in a fresh clone of the
+  // stage (resets CSS animation state), force layout, then re-add the class
+  // so paused animations start running from frame zero.
+  function restart() {
+    const stage = document.querySelector('.stage');
+    if (!stage) return;
+    document.body.classList.remove('playing');
+    const clone = stage.cloneNode(true);
+    stage.parentNode.replaceChild(clone, stage);
+    void clone.offsetHeight;
+    document.body.classList.add('playing');
+  }
+  let wasActive = false;
+  function checkActive() {
+    // Cross-origin file:// iframes can't reach the parent. Return null so
+    // the animation doesn't auto-fire on load; the bridge's postMessage
+    // will drive it instead.
+    let slide = null;
+    try {
+      if (window.frameElement && window.frameElement.closest) {
+        slide = window.frameElement.closest('svg.bespoke-marp-slide');
+      }
+    } catch (e) { slide = null; }
+    if (!slide) return null;
+    const isActive = slide.classList.contains('bespoke-marp-active');
+    if (isActive && !wasActive) restart();
+    wasActive = isActive;
+    return slide;
+  }
+  window.addEventListener('load', () => {
+    const slide = checkActive();
+    if (slide) {
+      try {
+        const MO = window.parent.MutationObserver || MutationObserver;
+        new MO(checkActive).observe(slide, { attributes: true, attributeFilter: ['class'] });
+      } catch (e) {
+        setInterval(checkActive, 250);
+      }
+    }
+  });
+
+  // Primary path for file:// cross-origin: receive postMessage from the deck's
+  // bridge script when this slide becomes the active Marp slide.
+  window.addEventListener('message', (e) => {
+    if (e.data === 'bespoke:active') restart();
+  });
+</script>
 
 </body>
 </html>

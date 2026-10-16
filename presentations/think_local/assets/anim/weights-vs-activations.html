@@ -53,7 +53,7 @@
   .weights {
     display: grid;
     grid-template-columns: repeat(4, var(--cell));
-    grid-template-rows: repeat(4, var(--cell));
+    grid-template-rows: repeat(3, var(--cell));
     gap: var(--gap);
     padding: 12px;
     border: 1.5px solid #CCCCCC;
@@ -263,10 +263,10 @@
 </div>
 
 <script>
-  // Fill in weight cells for each layer
+  // Fill in weight cells for each layer (3 rows x 4 cols = 12)
   for (const id of ['w1', 'w2', 'w3']) {
     const w = document.getElementById(id);
-    for (let i = 0; i < 16; i++) {
+    for (let i = 0; i < 12; i++) {
       const c = document.createElement('div');
       c.className = 'w-cell';
       w.insertBefore(c, w.firstChild);
@@ -336,6 +336,18 @@
   }
 
   cycle();
+
+  // Forward slide-nav keys to Marp parent when iframe has focus.
+  window.addEventListener('keydown', (e) => {
+    const nav = ['ArrowRight','ArrowLeft','ArrowUp','ArrowDown',' ','PageDown','PageUp','Home','End'];
+    if (!nav.includes(e.key)) return;
+    try {
+      window.parent.document.dispatchEvent(new KeyboardEvent('keydown', {
+        key: e.key, code: e.code, keyCode: e.keyCode, which: e.keyCode,
+        bubbles: true, cancelable: true
+      }));
+    } catch (err) {}
+  });
 </script>
 
 </body>
