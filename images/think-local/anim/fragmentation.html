@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>One model, four targets</title>
+<style>
+  :root {
+    --bg: #FFFFFF;
+    --ink: #111111;
+    --dim: #999999;
+    --mid: #666666;
+    --track: #F0F0F0;
+    --accent: #D83A4A;
+    --source: #111111;
+    --branch: #CCCCCC;
+    --branch-on: #111111;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Roboto", -apple-system, "Helvetica Neue", Arial, sans-serif;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .stage {
+    width: 1200px;
+    max-width: 1216px;
+    height: 600px;
+    position: relative;
+  }
+
+  .title {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: var(--mid);
+    text-transform: uppercase;
+    text-align: center;
+  }
+
+  .source {
+    position: absolute;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 240px;
+    padding: 24px 28px;
+    background: var(--source);
+    color: #FFFFFF;
+    border-radius: 10px;
+    text-align: center;
+    opacity: 0;
+    animation: fadein 0.4s ease forwards 0.2s;
+  }
+
+  .source-name {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+
+  .source-sub {
+    font-size: 13px;
+    color: #AAAAAA;
+    margin-top: 6px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .svg-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .path-line {
+    stroke: var(--branch);
+    stroke-width: 2;
+    fill: none;
+    stroke-dasharray: 1 1;
+    stroke-dashoffset: 1;
+    transition: stroke-dashoffset 0.8s ease, stroke 0.4s ease;
+  }
+
+  .path-line.on {
+    stroke-dashoffset: 0;
+    stroke: var(--branch-on);
+  }
+
+  .format {
+    position: absolute;
+    top: 260px;
+    width: 200px;
+    padding: 14px 18px;
+    background: #F8F8F8;
+    border: 1.5px solid #D8D8D8;
+    border-radius: 8px;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.4s ease, transform 0.4s ease, border-color 0.4s ease;
+  }
+
+  .format.on {
+    opacity: 1;
+    transform: translateY(0);
+    border-color: var(--ink);
+  }
+
+  .format-name {
+    font-family: "SF Mono", "Menlo", monospace;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .format-sub {
+    font-size: 11px;
+    color: var(--dim);
+    margin-top: 4px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  .target {
+    position: absolute;
+    top: 440px;
+    width: 200px;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  .target.on {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .target-chip {
+    width: 70px;
+    height: 70px;
+    margin: 0 auto 12px;
+    background: #F0F0F0;
+    border: 2px solid var(--ink);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    position: relative;
+  }
+
+  .target-chip::before,
+  .target-chip::after {
+    content: "";
+    position: absolute;
+    background: var(--ink);
+  }
+
+  .target-chip::before {
+    width: 6px; height: 2px;
+    top: 50%; left: -8px;
+    transform: translateY(-50%);
+    box-shadow: 0 -10px 0 0, 0 10px 0 0;
+  }
+
+  .target-chip::after {
+    width: 6px; height: 2px;
+    top: 50%; right: -8px;
+    transform: translateY(-50%);
+    box-shadow: 0 -10px 0 0, 0 10px 0 0;
+  }
+
+  .target-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: 0.5px;
+  }
+
+  .target-sub {
+    font-size: 11px;
+    color: var(--dim);
+    margin-top: 2px;
+    letter-spacing: 0.5px;
+  }
+
+  /* Column positions (centered on stage width 1200) */
+  .col-0 { left: 60px; }
+  .col-1 { left: 320px; }
+  .col-2 { left: 580px; }
+  .col-3 { left: 840px; }
+
+  .caption {
+    position: absolute;
+    bottom: -40px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 18px;
+    color: var(--mid);
+    letter-spacing: 0.5px;
+    font-weight: 500;
+    opacity: 0;
+    animation: fadein 0.5s ease forwards 5.5s;
+  }
+
+  @keyframes fadein { to { opacity: 1; } }
+</style>
+<style>
+  /* Blog embed: lay out at slide size (1280x720), then scale to the iframe width. */
+  html { overflow: hidden; display: block !important; }
+  body { width: 1280px !important; height: 720px !important; position: relative; transform-origin: 0 0; }
+</style>
+<script>
+  (function(){
+    function fit(){ if (document.body) document.body.style.transform = 'scale(' + (window.innerWidth / 1280) + ')'; }
+    window.addEventListener('resize', fit);
+    document.addEventListener('DOMContentLoaded', fit);
+  })();
+</script>
+</head>
+<body>
+
+<div class="stage">
+
+  <div class="title">One model. Four targets. Zero portability.</div>
+
+  <div class="source">
+    <div class="source-name">model.pt</div>
+    <div class="source-sub">PyTorch · trained once</div>
+  </div>
+
+  <svg class="svg-layer" viewBox="0 0 1200 600" preserveAspectRatio="none">
+    <!-- Endpoints are recomputed from actual DOM positions in script below -->
+    <path class="path-line" pathLength="1" id="line-0" d="M 600 180 L 160 260"></path>
+    <path class="path-line" pathLength="1" id="line-1" d="M 600 180 L 420 260"></path>
+    <path class="path-line" pathLength="1" id="line-2" d="M 600 180 L 680 260"></path>
+    <path class="path-line" pathLength="1" id="line-3" d="M 600 180 L 940 260"></path>
+  </svg>
+
+  <div class="format col-0" id="fmt-0">
+    <div class="format-name">.mlpackage</div>
+    <div class="format-sub">Core ML</div>
+  </div>
+
+  <div class="format col-1" id="fmt-1">
+    <div class="format-name">.tflite</div>
+    <div class="format-sub">LiteRT</div>
+  </div>
+
+  <div class="format col-2" id="fmt-2">
+    <div class="format-name">.pte</div>
+    <div class="format-sub">ExecuTorch QNN</div>
+  </div>
+
+  <div class="format col-3" id="fmt-3">
+    <div class="format-name">.onnx</div>
+    <div class="format-sub">ONNX Runtime</div>
+  </div>
+
+  <div class="target col-0" id="tgt-0">
+    <div class="target-chip">ANE</div>
+    <div class="target-name">Apple Neural Engine</div>
+    <div class="target-sub">iPhone · Mac</div>
+  </div>
+
+  <div class="target col-1" id="tgt-1">
+    <div class="target-chip">GPU</div>
+    <div class="target-name">GPU delegate</div>
+    <div class="target-sub">generic Android</div>
+  </div>
+
+  <div class="target col-2" id="tgt-2">
+    <div class="target-chip">HTP</div>
+    <div class="target-name">Hexagon NPU</div>
+    <div class="target-sub">Snapdragon only</div>
+  </div>
+
+  <div class="target col-3" id="tgt-3">
+    <div class="target-chip">CPU</div>
+    <div class="target-name">XNNPACK</div>
+    <div class="target-sub">universal fallback</div>
+  </div>
+
+  <div class="caption">Each target needs its own compile step, its own quirks, its own debugging.</div>
+
+</div>
+
+<script>
+  const svg = document.querySelector('.svg-layer');
+  const stage = document.querySelector('.stage');
+  const source = document.querySelector('.source');
+  const lines = document.querySelectorAll('.path-line');
+  const formats = document.querySelectorAll('.format');
+  const targets = document.querySelectorAll('.target');
+
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  // Point SVG viewBox at the actual stage pixel size so line coords and box
+  // coords share one coordinate system. Then compute each line from the actual
+  // source and format DOM positions.
+  function updateLines() {
+    const stageRect = stage.getBoundingClientRect();
+    if (stageRect.width === 0 || stageRect.height === 0) return;
+    svg.setAttribute('viewBox', `0 0 ${stageRect.width} ${stageRect.height}`);
+    const sourceRect = source.getBoundingClientRect();
+    const sx = sourceRect.left + sourceRect.width / 2 - stageRect.left;
+    const sy = sourceRect.bottom - stageRect.top;
+    formats.forEach((fmt, i) => {
+      const r = fmt.getBoundingClientRect();
+      const fx = r.left + r.width / 2 - stageRect.left;
+      const fy = r.top - stageRect.top;
+      const midY = sy + (fy - sy) * 0.55;
+      lines[i].setAttribute('d', `M ${sx} ${sy} Q ${sx} ${midY} ${fx} ${fy}`);
+    });
+  }
+
+  function reset() {
+    lines.forEach(l => l.classList.remove('on'));
+    formats.forEach(f => f.classList.remove('on'));
+    targets.forEach(t => t.classList.remove('on'));
+  }
+
+  async function animate() {
+    await sleep(400);
+    for (let i = 0; i < 4; i++) {
+      lines[i].classList.add('on');
+      await sleep(500);
+      formats[i].classList.add('on');
+      await sleep(300);
+      targets[i].classList.add('on');
+      await sleep(400);
+    }
+  }
+
+  // --- Visibility-aware playback (bespoke.js aware) ---
+  // Marp's bespoke runtime toggles `bespoke-marp-active` on the parent slide
+  // <svg> element. We watch that class so the animation replays whenever the
+  // user navigates to this slide (and fires correctly the first time too).
+  let running = false;
+  let wasActive = false;
+  function run() {
+    if (running) return;
+    running = true;
+    reset();
+    updateLines();
+    animate().then(() => { running = false; });
+  }
+  function checkActive() {
+    // If the parent frame is cross-origin (file:// in Chrome), we can't read
+    // its DOM. Return null here — the bridge script's postMessage path will
+    // trigger the animation instead. Firing on load would make the animation
+    // play before the user ever reaches the slide.
+    let slide = null;
+    try {
+      if (window.frameElement && window.frameElement.closest) {
+        slide = window.frameElement.closest('svg.bespoke-marp-slide');
+      }
+    } catch (e) { slide = null; }
+    if (!slide) return null;
+    const isActive = slide.classList.contains('bespoke-marp-active');
+    if (isActive && !wasActive) run();
+    wasActive = isActive;
+    return slide;
+  }
+
+  // --- Keyboard passthrough ---
+  // When the iframe has focus, arrow / space / PgUp / PgDn get swallowed and
+  // Marp can't advance. Forward them back to the parent document.
+  window.addEventListener('keydown', (e) => {
+    const nav = ['ArrowRight','ArrowLeft','ArrowUp','ArrowDown',' ','PageDown','PageUp','Home','End'];
+    if (!nav.includes(e.key)) return;
+    try {
+      const evt = new KeyboardEvent('keydown', {
+        key: e.key, code: e.code, keyCode: e.keyCode, which: e.keyCode,
+        bubbles: true, cancelable: true
+      });
+      window.parent.document.dispatchEvent(evt);
+    } catch (err) {}
+  });
+
+  window.addEventListener('resize', updateLines);
+  window.addEventListener('load', () => {
+    updateLines();
+    const slide = checkActive();
+    if (slide) {
+      try {
+        const MO = window.parent.MutationObserver || MutationObserver;
+        new MO(checkActive).observe(slide, { attributes: true, attributeFilter: ['class'] });
+      } catch (e) {
+        setInterval(checkActive, 250);
+      }
+    }
+  });
+
+  // Primary path for file:// cross-origin: receive postMessage from the deck's
+  // bridge script (in the markdown's top-level <script>) when this slide
+  // becomes the active Marp slide.
+  window.addEventListener('message', (e) => {
+    if (e.data === 'bespoke:active') {
+      wasActive = false;
+      updateLines();
+      run();
+    }
+  });
+</script>
+
+<script>
+// Blog embed: replay when the iframe scrolls into view.
+(function(){
+  var seen=false;
+  new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(e.isIntersecting && !seen){ seen=true; window.postMessage('bespoke:active','*'); }
+      if(!e.isIntersecting){ seen=false; }
+    });
+  },{threshold:0.5}).observe(document.body);
+})();
+</script>
+</body>
+</html>
