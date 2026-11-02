@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Static vs Dynamic Shapes</title>
+<style>
+  :root {
+    --bg: #FFFFFF;
+    --ink: #111111;
+    --dim: #E8E8E8;
+    --compile: #D83A4A;
+    --run: #111111;
+    --done: #2EA846;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Roboto", -apple-system, "Helvetica Neue", Arial, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .stage {
+    width: 1200px;
+    max-width: 1152px;
+    display: flex;
+    flex-direction: column;
+    gap: 56px;
+  }
+
+  .track {
+    display: grid;
+    grid-template-columns: 140px 1fr 90px;
+    align-items: center;
+    gap: 24px;
+    position: relative;
+  }
+
+  .label {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #111;
+  }
+
+  .label small {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    color: #888;
+    text-transform: none;
+    margin-top: 4px;
+  }
+
+  .blocks {
+    position: relative;
+    height: 60px;
+    border-bottom: 2px solid var(--dim);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    overflow: visible;
+  }
+
+  .block {
+    height: 44px;
+    border-radius: 4px;
+    opacity: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFFFFF;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    animation: pop var(--duration, 100ms) ease-out forwards;
+    animation-delay: var(--delay, 0ms);
+    flex-shrink: 0;
+  }
+
+  @keyframes pop {
+    0%   { opacity: 0; transform: scaleY(0.3); }
+    60%  { opacity: 1; transform: scaleY(1.1); }
+    100% { opacity: 1; transform: scaleY(1); }
+  }
+
+  .block.compile {
+    background: var(--compile);
+    width: 110px;
+  }
+
+  .block.run {
+    background: var(--run);
+    width: 22px;
+  }
+
+  .done {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--done);
+    opacity: 0;
+    animation: fadein 300ms ease forwards;
+    animation-delay: var(--delay, 0ms);
+    letter-spacing: 1px;
+  }
+
+  @keyframes fadein {
+    to { opacity: 1; }
+  }
+
+  .still-going {
+    font-size: 15px;
+    font-weight: 700;
+    color: #888;
+    opacity: 0;
+    animation: fadein 300ms ease forwards;
+    animation-delay: 1700ms;
+    letter-spacing: 1px;
+  }
+
+  .time-axis {
+    position: absolute;
+    bottom: -22px;
+    left: 164px;
+    right: 114px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #AAA;
+    font-weight: 500;
+    letter-spacing: 1px;
+  }
+
+  .legend {
+    position: fixed;
+    bottom: 40px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 48px;
+    font-size: 18px;
+    color: #333;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 500;
+  }
+
+  .swatch {
+    width: 20px;
+    height: 20px;
+    border-radius: 3px;
+  }
+
+  .swatch.compile { background: var(--compile); }
+  .swatch.run { background: var(--run); }
+
+</style>
+<style>
+  /* Blog embed: lay out at slide size (1280x720), then scale to the iframe width. */
+  html { overflow: hidden; display: block !important; }
+  body { width: 1280px !important; height: 720px !important; position: relative; transform-origin: 0 0; }
+</style>
+<script>
+  (function(){
+    function fit(){ if (document.body) document.body.style.transform = 'scale(' + (window.innerWidth / 1280) + ')'; }
+    window.addEventListener('resize', fit);
+    document.addEventListener('DOMContentLoaded', fit);
+  })();
+</script>
+</head>
+<body>
+
+<div class="stage">
+
+  <div class="track" id="track-static">
+    <div class="label">Static<small>shape known at compile time</small></div>
+    <div class="blocks" id="blocks-static"></div>
+    <div class="done" id="done-static">✓ done</div>
+  </div>
+
+  <div class="track" id="track-dynamic">
+    <div class="label">Dynamic<small>shape varies each call</small></div>
+    <div class="blocks" id="blocks-dynamic"></div>
+    <div class="still-going" id="going-dynamic">still going…</div>
+  </div>
+
+</div>
+
+<div class="legend">
+  <div class="legend-item">
+    <div class="swatch compile"></div>
+    <span>Compile</span>
+  </div>
+  <div class="legend-item">
+    <div class="swatch run"></div>
+    <span>Inference</span>
+  </div>
+</div>
+
+<script>
+  const COMPILE_MS = 600;
+  const RUN_MS = 80;
+  const RUNS = 10;
+  const PAUSE_MS = 2200;
+
+  function build() {
+    // Static: one compile, then RUNS inferences
+    const sBlocks = document.getElementById('blocks-static');
+    sBlocks.innerHTML = '';
+    let t = 0;
+
+    const c = document.createElement('div');
+    c.className = 'block compile';
+    c.textContent = 'compile';
+    c.style.setProperty('--delay', t + 'ms');
+    c.style.setProperty('--duration', COMPILE_MS + 'ms');
+    sBlocks.appendChild(c);
+    t += COMPILE_MS;
+
+    for (let i = 0; i < RUNS; i++) {
+      const r = document.createElement('div');
+      r.className = 'block run';
+      r.style.setProperty('--delay', t + 'ms');
+      r.style.setProperty('--duration', RUN_MS + 'ms');
+      sBlocks.appendChild(r);
+      t += RUN_MS;
+    }
+    const staticEnd = t;
+    document.getElementById('done-static').style.setProperty('--delay', (staticEnd + 100) + 'ms');
+
+    // Dynamic: compile + inference, repeated
+    const dBlocks = document.getElementById('blocks-dynamic');
+    dBlocks.innerHTML = '';
+    let td = 0;
+
+    for (let i = 0; i < RUNS; i++) {
+      const c = document.createElement('div');
+      c.className = 'block compile';
+      c.textContent = 'compile';
+      c.style.setProperty('--delay', td + 'ms');
+      c.style.setProperty('--duration', COMPILE_MS + 'ms');
+      dBlocks.appendChild(c);
+      td += COMPILE_MS;
+
+      const r = document.createElement('div');
+      r.className = 'block run';
+      r.style.setProperty('--delay', td + 'ms');
+      r.style.setProperty('--duration', RUN_MS + 'ms');
+      dBlocks.appendChild(r);
+      td += RUN_MS;
+    }
+  }
+
+  // build() runs on bespoke:active postMessage (or MutationObserver in
+  // same-origin serves). Do not auto-fire here, otherwise the compile/run
+  // blocks animate before the user reaches the slide.
+
+  // Forward slide-nav keys to Marp parent when iframe has focus.
+  window.addEventListener('keydown', (e) => {
+    const nav = ['ArrowRight','ArrowLeft','ArrowUp','ArrowDown',' ','PageDown','PageUp','Home','End'];
+    if (!nav.includes(e.key)) return;
+    try {
+      window.parent.document.dispatchEvent(new KeyboardEvent('keydown', {
+        key: e.key, code: e.code, keyCode: e.keyCode, which: e.keyCode,
+        bubbles: true, cancelable: true
+      }));
+    } catch (err) {}
+  });
+
+  // Rebuild each time the parent bespoke slide becomes active.
+  let wasActive = false;
+  function checkActive() {
+    // Cross-origin file:// iframes can't reach the parent. Return null so
+    // the animation doesn't auto-fire on load; the bridge's postMessage
+    // will drive it instead.
+    let slide = null;
+    try {
+      if (window.frameElement && window.frameElement.closest) {
+        slide = window.frameElement.closest('svg.bespoke-marp-slide');
+      }
+    } catch (e) { slide = null; }
+    if (!slide) return null;
+    const isActive = slide.classList.contains('bespoke-marp-active');
+    if (isActive && !wasActive) build();
+    wasActive = isActive;
+    return slide;
+  }
+  window.addEventListener('load', () => {
+    const slide = checkActive();
+    if (slide) {
+      try {
+        const MO = window.parent.MutationObserver || MutationObserver;
+        new MO(checkActive).observe(slide, { attributes: true, attributeFilter: ['class'] });
+      } catch (e) {
+        setInterval(checkActive, 250);
+      }
+    }
+  });
+
+  // Primary path for file:// cross-origin: receive postMessage from the deck's
+  // bridge script when this slide becomes the active Marp slide.
+  window.addEventListener('message', (e) => {
+    if (e.data === 'bespoke:active') build();
+  });
+</script>
+
+<script>
+// Blog embed: replay when the iframe scrolls into view.
+(function(){
+  var seen=false;
+  new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(e.isIntersecting && !seen){ seen=true; window.postMessage('bespoke:active','*'); }
+      if(!e.isIntersecting){ seen=false; }
+    });
+  },{threshold:0.5}).observe(document.body);
+})();
+</script>
+</body>
+</html>
