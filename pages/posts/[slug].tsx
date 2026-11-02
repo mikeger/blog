@@ -70,7 +70,16 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     mdxOptions: {
       remarkPlugins: [
         require('remark-code-titles'),
-        [remarkEmbedder, { transformers: [oembedTransformer] }],
+        [
+          remarkEmbedder,
+          {
+            transformers: [oembedTransformer],
+            // If a provider's oEmbed endpoint breaks, render a plain link
+            // instead of failing the whole static export.
+            handleError: ({ url }: { url: string }) =>
+              `<p><a href="${url}">${url}</a></p>`,
+          },
+        ],
       ],
       rehypePlugins: [mdxPrism, rehypeSlug, rehypeAutolinkHeadings],
     },
