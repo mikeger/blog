@@ -171,7 +171,7 @@ Cancellation is the weak spot. `MLModel`'s `prediction` call takes no cancellati
 
 ### A note on Android
 
-I also gave an Android version of this talk at KotlinLeeds ([recording](/posts/think-local-android)). The lessons above apply there too. The Android-only surprises:
+I also gave an Android version of this talk. The lessons above apply there too. The Android-only surprises:
 
 - **Runtime.** We train in PyTorch, so we use ExecuTorch, PyTorch's own on-device runtime. Every conversion from one format to another is a chance to lose an operation, precision or speed, so pick the runtime closest to where your model already lives.
 - **Packaging.** On iOS, the system compiles the model for the chip at first launch. On Android's fastest NPU path, that compilation happens on a build server before you ship, and the output is tied to a chip family. You compile once per chip family, bundle all of them in the APK (or download the right one), and pick the matching one at launch. A new flagship chip means a new entry in your build pipeline.
